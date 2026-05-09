@@ -2,21 +2,17 @@ package com.canyoncompanion.canyon_api.model.entities;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Component
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-@Data
+@Getter
+@Setter
 @Slf4j
 @Table(name = "users")
 public class UserEntity {

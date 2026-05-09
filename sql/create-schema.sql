@@ -188,7 +188,7 @@ CREATE INDEX idx_users_status ON users(status);
 -- DESCENTS
 CREATE INDEX idx_descents_user_id ON descents(user_id);
 CREATE INDEX idx_descents_location ON descents(location);
-CREATE INDEX idx_descents_difficulty ON descents(difficulty);
+CREATE INDEX idx_descents_name ON descents(name);
 
 -- IMAGES
 CREATE INDEX idx_descent_images_descent_id ON descent_images(descent_id);

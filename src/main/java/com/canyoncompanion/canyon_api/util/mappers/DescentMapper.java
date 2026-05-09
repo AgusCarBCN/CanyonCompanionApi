@@ -1,16 +1,15 @@
 package com.canyoncompanion.canyon_api.util.mappers;
 
-
-import com.canyoncompanion.canyon_api.dtos.requests.DescentRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.DescentResponseDTO;
+import com.canyoncompanion.canyon_api.dtos.requests.DescentRequestDTO;
 import com.canyoncompanion.canyon_api.model.entities.DescentEntity;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface DescentMapper {
 
-    @Mapping(source = "user.id", target = "userId")
-    @Mapping(source = "user.username", target = "username")
+    @Mapping(source = "user.id", target = "id")
+    @Mapping(source = "user.username", target = "name")
     @Mapping(source = "verticalCharacter", target = "verticalCharacter")
     @Mapping(source = "aquaticCharacter", target = "aquaticCharacter")
     @Mapping(source = "commitment", target = "commitment")

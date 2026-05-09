@@ -2,38 +2,47 @@ package com.canyoncompanion.canyon_api.model.entities;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDateTime;
 
 @Entity
-
-@Component
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-@Data
-@Slf4j
 @Table(name = "descent_images")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Slf4j
 public class DescentImageEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    // =========================
+    // RELATIONSHIP
+    // =========================
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "descent_id", nullable = false)
     private DescentEntity descent;
 
-    @Column(nullable = false)
+    // =========================
+    // IMAGE INFO
+    // =========================
+    @Column(name = "image_url", nullable = false)
     private String imageUrl;
 
+    // =========================
+    // AUDIT
+    // =========================
+    @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

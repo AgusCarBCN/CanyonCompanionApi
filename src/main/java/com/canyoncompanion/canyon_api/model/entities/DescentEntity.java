@@ -5,21 +5,17 @@ import com.canyoncompanion.canyon_api.model.enums.AquaticCharacter;
 import com.canyoncompanion.canyon_api.model.enums.Commitment;
 import com.canyoncompanion.canyon_api.model.enums.VerticalCharacter;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Component
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-@Data
+@Getter
+@Setter
 @Slf4j
 @Table(name = "descents")
 public class DescentEntity {
@@ -49,12 +45,15 @@ public class DescentEntity {
     // =========================
     // CHARACTERISTICS
     // =========================
+    @Column(name = "vertical_character")
     @Enumerated(EnumType.STRING)
     private VerticalCharacter verticalCharacter;
 
+    @Column(name = "aquatic_character")
     @Enumerated(EnumType.STRING)
     private AquaticCharacter aquaticCharacter;
 
+    @Column(name = "commitment")
     @Enumerated(EnumType.STRING)
     private Commitment commitment;
 
