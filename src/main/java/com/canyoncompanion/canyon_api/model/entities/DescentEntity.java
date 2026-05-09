@@ -1,6 +1,9 @@
 package com.canyoncompanion.canyon_api.model.entities;
 
 
+import com.canyoncompanion.canyon_api.model.enums.AquaticCharacter;
+import com.canyoncompanion.canyon_api.model.enums.Commitment;
+import com.canyoncompanion.canyon_api.model.enums.VerticalCharacter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,14 +49,14 @@ public class DescentEntity {
     // =========================
     // CHARACTERISTICS
     // =========================
-    @Column(name = "vertical_character", length = 3)
-    private String verticalCharacter;
+    @Enumerated(EnumType.STRING)
+    private VerticalCharacter verticalCharacter;
 
-    @Column(name = "aquatic_character", length = 3)
-    private String aquaticCharacter;
+    @Enumerated(EnumType.STRING)
+    private AquaticCharacter aquaticCharacter;
 
-    @Column(length = 3)
-    private String commitment;
+    @Enumerated(EnumType.STRING)
+    private Commitment commitment;
 
     // =========================
     // LINKS / DESCRIPTION
