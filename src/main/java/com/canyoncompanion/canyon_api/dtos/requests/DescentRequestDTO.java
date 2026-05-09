@@ -7,6 +7,8 @@ import com.canyoncompanion.canyon_api.model.enums.VerticalCharacter;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
@@ -35,4 +37,7 @@ public class DescentRequestDTO {
     private String descriptionLink;
 
     private String comments;
+
+    // 📸 IMÁGENES
+    private List<DescentImageRequestDTO> images;
 }

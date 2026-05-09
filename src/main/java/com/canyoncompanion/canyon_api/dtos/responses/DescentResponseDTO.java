@@ -6,6 +6,8 @@ import com.canyoncompanion.canyon_api.model.enums.VerticalCharacter;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
@@ -31,6 +33,8 @@ public class DescentResponseDTO {
 
     private String comments;
 
+    private List<DescentImageResponseDTO> images;
+
     // =========================
     // RELACIÓN SIMPLIFICADA
     // =========================
@@ -44,4 +48,6 @@ public class DescentResponseDTO {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+
 }

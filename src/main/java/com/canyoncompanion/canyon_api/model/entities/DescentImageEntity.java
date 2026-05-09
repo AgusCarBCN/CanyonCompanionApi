@@ -1,6 +1,7 @@
 package com.canyoncompanion.canyon_api.model.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 @Table(name = "descent_images")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Slf4j
@@ -24,6 +26,7 @@ public class DescentImageEntity {
     // =========================
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "descent_id", nullable = false)
+    @JsonIgnore
     private DescentEntity descent;
 
     // =========================

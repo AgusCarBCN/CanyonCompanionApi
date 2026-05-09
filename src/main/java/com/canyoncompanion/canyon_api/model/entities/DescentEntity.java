@@ -7,9 +7,9 @@ import com.canyoncompanion.canyon_api.model.enums.VerticalCharacter;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -30,6 +30,15 @@ public class DescentEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
+    @OneToMany(
+            mappedBy = "descent",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<DescentImageEntity> images = new ArrayList<>();
     // =========================
     // BASIC INFO
     // =========================
@@ -74,5 +83,14 @@ public class DescentEntity {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    public void addImage(DescentImageEntity image) {
+        images.add(image);
+        image.setDescent(this);
+    }
+    public void removeImage(DescentImageEntity image) {
+        images.remove(image);
+        image.setDescent(null);
+    }
 
 }

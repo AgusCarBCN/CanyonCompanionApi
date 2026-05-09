@@ -1,0 +1,32 @@
+package com.canyoncompanion.canyon_api.exception;
+
+public enum ErrorCode {
+
+    ADMIN_NOT_FOUND("Admin not found"),
+    USER_CANNOT_NULL("User cannot be null"),
+    USER_NOT_FOUND("User not found"),
+    USER_IS_DEACTIVATE("User has been deactivated"),
+    USER_IS_ACTIVATE("User has been activated"),
+    USER_IS_SUSPEND("User has been suspende because "),
+    ADMIN_AUTHORIZE("Only an admin user can "),
+    USER_DEACTIVATED_REASON("User deactivated because"),
+    INVALID_CREDENTIALS_PASSWORD("Invalid password"),
+    INVALID_CREDENTIALS_EMAIL("Invalid email")   ,
+    DESCENT_NOT_FOUND("Descent not found"),
+    IMAGE_NOT_FOUND("Image not found in descent"),
+    ROUTE_NOT_FOUND("Route not found"),
+    TOO_MANY_ITEMS("Cannot remove more items than ordered"),
+    EMAIL_ALREADY_EXISTS("Email already registered"),
+    INVALID_FIELD("Invalid field"),
+    INVALID_REFRESH_TOKEN("Invalid refresh token");
+
+    private final String defaultMessage;
+
+    ErrorCode(String defaultMessage) {
+        this.defaultMessage = defaultMessage;
+    }
+
+    public String getDefaultMessage() {
+        return defaultMessage;
+    }
+}

@@ -7,6 +7,8 @@ import com.canyoncompanion.canyon_api.model.entities.DescentImageEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface DescentImageMapper {
 
@@ -15,6 +17,8 @@ public interface DescentImageMapper {
     // =========================
     @Mapping(source = "descent.id", target = "descentId")
     DescentImageResponseDTO toDTO(DescentImageEntity entity);
+
+    List<DescentImageResponseDTO> toDTOList(List<DescentImageEntity> entities);
 
     // =========================
     // REQUEST DTO → ENTITY

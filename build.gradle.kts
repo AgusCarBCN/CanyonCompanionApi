@@ -58,7 +58,10 @@ dependencies {
 	// DEVTOOLS
 	// =========================
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
-
+	// ========================
+	// SWAGGER
+	// =========================
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1")
 	// =========================
 	// TESTS
 	// =========================
