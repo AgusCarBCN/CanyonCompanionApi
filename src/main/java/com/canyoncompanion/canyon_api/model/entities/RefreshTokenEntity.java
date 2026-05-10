@@ -10,6 +10,7 @@ import java.time.Instant;
 @Table(name = "refresh_tokens")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RefreshTokenEntity {

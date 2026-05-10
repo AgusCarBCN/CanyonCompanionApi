@@ -28,4 +28,5 @@ public interface DescentImageMapper {
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     DescentImageEntity toEntity(DescentImageRequestDTO dto);
+    List<DescentImageEntity> toEntityList(List<DescentImageRequestDTO> dtos);
 }
