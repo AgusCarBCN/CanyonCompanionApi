@@ -7,7 +7,7 @@ import com.canyoncompanion.canyon_api.dtos.requests.UserRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.AuthResponse;
 import com.canyoncompanion.canyon_api.exception.BusinessException;
 
-public interface UserRegistrationService {
+public interface UserAuthService {
 
     /**
      * Registers a new user in the system.
