@@ -72,28 +72,6 @@ public class UserAuthController {
 
 
     // ---------------------------
-    // Register Admin
-    // ---------------------------
-    @Operation(
-            summary = "Register a new admin user",
-            description = "Registers a new admin user. Only accessible to users with ADMIN role.",
-            security = @SecurityRequirement(name = "Security Token")
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Admin user registered successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid request or email already exists"),
-            @ApiResponse(responseCode = "403", description = "Forbidden: Admin role required")
-    })
-    @PostMapping("/register/admin")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<AuthResponse> registerAdmin(@RequestBody @Valid UserRequestDTO userRequestDTO) {
-
-        // Crear usuario administrador
-       var response= registrationService.registerAdminUser(userRequestDTO);
-       return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    // ---------------------------
     // Refresh Token
     // ---------------------------
     @Operation(

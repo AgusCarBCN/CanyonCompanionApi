@@ -18,14 +18,7 @@ public interface UserAuthService {
      */
     AuthResponse registerUser(UserRequestDTO request);
 
-    /**
-     * Registers a new administrator user in the system.
-     *
-     * @param request the admin user registration data
-     * @return the created admin user information
-     * @throws BusinessException if the user already exists in the system
-     */
-    AuthResponse registerAdminUser(UserRequestDTO request);
+
     /**
      * Login user in the system.
      *
@@ -34,7 +27,7 @@ public interface UserAuthService {
      * @throws BusinessException if the user already exists in the system
      */
 
-    public AuthResponse login(AuthRequestDTO loginRequest);
+     AuthResponse login(AuthRequestDTO loginRequest);
     /**
      * Resends the account verification email.
      *

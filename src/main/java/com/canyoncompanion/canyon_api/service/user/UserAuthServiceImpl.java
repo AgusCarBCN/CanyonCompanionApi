@@ -6,6 +6,7 @@ import com.canyoncompanion.canyon_api.dtos.requests.TokenRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.requests.UserRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.AuthResponse;
 import com.canyoncompanion.canyon_api.exception.BusinessException;
+import com.canyoncompanion.canyon_api.exception.ErrorCode;
 import com.canyoncompanion.canyon_api.model.entities.RoleEntity;
 import com.canyoncompanion.canyon_api.model.entities.UserEntity;
 import com.canyoncompanion.canyon_api.model.enums.Roles;
@@ -69,60 +70,27 @@ public class UserAuthServiceImpl implements UserAuthService {
         return authenticateAndGenerateTokens(request.getEmail(), request.getPassword());
     }
 
-    // =====================================================
-    // REGISTER ADMIN
-    // =====================================================
-    @Override
-    public AuthResponse registerAdminUser(UserRequestDTO request) {
-
-        if (userRepository.existsByEmailIgnoreCase(request.getEmail())) {
-            throw new BusinessException(
-                    "USER_ALREADY_EXISTS",
-                    "User already exists with email",
-                    HttpStatus.CONFLICT
-            );
-        }
-        log.info("REGISTER USER START - email: {}", request.getEmail());
-        try {
-
-            UserEntity user = userMapper.toUserEntity(request);
-            log.info("MAPPER OK");
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
-            //user.addRolesToUser(true);
-            // 🔥 AQUÍ USAS TU MÉTODO
-            Set<RoleEntity> roles = buildRoles(false);
-            user.setRoles(roles);
-            userRepository.save(user);
-            log.info("REGISTER USER SUCCESS - email: {}", request.getEmail());
-        } catch (Exception e) {
-            log.error("REGISTER USER FAILED - email: {}, error: {}", request.getEmail(), e.getMessage());
-            throw new BusinessException(
-                    "USER_REGISTRATION_FAILED",
-                    "Failed to register user",
-                    HttpStatus.INTERNAL_SERVER_ERROR
-            );
-        }
-
-        return authenticateAndGenerateTokens(request.getEmail(), request.getPassword());
-    }
 
     // =====================================================
     // LOGIN
     // =====================================================
     @Override
     public AuthResponse login(AuthRequestDTO loginRequest) {
+        // Find user by username or email
+        UserEntity user = userRepository.findByEmail(
+                loginRequest.getEmail()).orElseThrow( ()->new BusinessException(
+                ErrorCode.USER_NOT_FOUND.name(),
+                ErrorCode.USER_NOT_FOUND.getDefaultMessage(),
+                HttpStatus.NOT_FOUND));
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
-                        loginRequest.getPassword()
-                )
-        );
-
-        return authenticateAndGenerateTokens(
-                loginRequest.getEmail(),
-                loginRequest.getPassword()
-        );
+        // Verify password
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            throw new BusinessException(
+                    ErrorCode.INVALID_CREDENTIALS_PASSWORD.name(),
+                    ErrorCode.INVALID_CREDENTIALS_PASSWORD.getDefaultMessage(),
+                    HttpStatus.UNAUTHORIZED);
+        }
+        return authenticateAndGenerateTokens(loginRequest.getEmail(), loginRequest.getPassword());
     }
 
     // =====================================================
@@ -206,4 +174,5 @@ public class UserAuthServiceImpl implements UserAuthService {
 
         return roles;
     }
+
 }

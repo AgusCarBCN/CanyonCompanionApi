@@ -19,6 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @Slf4j
 @Table(name = "users")
 public class UserEntity {
@@ -58,7 +59,7 @@ public class UserEntity {
 
 
     @ManyToMany(fetch = FetchType.EAGER)
-
+    @Builder.Default
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
