@@ -7,8 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
-
 @Data
 @Builder
 @AllArgsConstructor
@@ -24,7 +22,7 @@ public class UserResponseDTO {
             example = "John",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    private String name;
+    private String username;
 
     @Schema(
             description = "User's surname",
@@ -33,12 +31,6 @@ public class UserResponseDTO {
     )
     private String surname;
 
-    @Schema(
-            description = "Tax ID of the user",
-            example = "123456789",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    private String taxId;
 
     @Schema(
             description = "Email address of the user",

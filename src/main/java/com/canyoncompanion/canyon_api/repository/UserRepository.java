@@ -21,7 +21,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
        BÚSQUEDAS
        ========================= */
 
-    Optional<UserEntity> findByNameIgnoreCase(String userName);
+
 
     Optional<UserEntity> findByEmail(String email);
 
@@ -33,17 +33,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Page<UserEntity> findAllByStatus(UserStatus status,Pageable pageable);
 
-    Page<UserEntity> findAllByCreatedAtAfter(Pageable pageable, LocalDate createdAt);
 
-    Page<UserEntity> findAllByCreatedAtBefore(LocalDate createdAt, Pageable pageable);
-
-    Page<UserEntity> findByCreatedAt(LocalDate createdAt, Pageable pageable);
-
-    Page<UserEntity> findAllByCreatedAtBetween(
-            LocalDate startDate,
-            LocalDate endDate,
-            Pageable pageable
-    );
 
     Page<UserEntity> findAllByRoles_Role(Roles role, Pageable pageable);
 
@@ -51,7 +41,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
        VALIDACIONES
        ========================= */
 
-    boolean existsByNameIgnoreCase(String userName);
 
     boolean existsByEmailIgnoreCase(String email);
 
@@ -67,10 +56,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
        ELIMINACIÓN
        ========================= */
 
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM UserEntity u WHERE u.id = :id")
-    void deleteByIdDirect(@Param("id") Long id);
+
 
     @Query("SELECT u FROM UserEntity u JOIN FETCH u.roles WHERE u.email = :email")
     Optional<UserEntity> findByEmailWithRoles(@Param("email") String email);

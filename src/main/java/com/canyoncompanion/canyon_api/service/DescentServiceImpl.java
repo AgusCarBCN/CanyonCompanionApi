@@ -10,6 +10,7 @@ import com.canyoncompanion.canyon_api.model.entities.DescentEntity;
 import com.canyoncompanion.canyon_api.model.entities.DescentImageEntity;
 import com.canyoncompanion.canyon_api.model.entities.UserEntity;
 import com.canyoncompanion.canyon_api.repository.DescentRepository;
+import com.canyoncompanion.canyon_api.repository.UserRepository;
 import com.canyoncompanion.canyon_api.util.helpers.Sort;
 import com.canyoncompanion.canyon_api.util.mappers.DescentImageMapper;
 import com.canyoncompanion.canyon_api.util.mappers.DescentMapper;

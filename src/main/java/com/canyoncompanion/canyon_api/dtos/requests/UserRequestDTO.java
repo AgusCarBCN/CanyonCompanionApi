@@ -10,8 +10,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
-
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,7 +29,7 @@ public class UserRequestDTO {
     )
     @NotBlank(message = "Username is required")
     @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
-    private String name;
+    private String username;
 
     @Schema(
             description = "User's surname",
@@ -43,16 +41,6 @@ public class UserRequestDTO {
     @Size(min = 3, max = 100, message = "Surname must be between 3 and 100 characters")
     private String surname;
 
-    @Schema(
-            description = "User's tax identification number",
-            example = "123456789",
-            requiredMode = Schema.RequiredMode.REQUIRED,
-            minLength = 5,
-            maxLength = 20
-    )
-    @NotBlank(message = "Tax ID is required")
-    @Size(min = 5, max = 20, message = "Tax ID must be between 5 and 20 characters")
-    private String taxId;
 
     @Schema(
             description = "User's email address",

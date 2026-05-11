@@ -9,8 +9,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -21,13 +19,17 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 @Slf4j
 @Table(name = "users")
 public class UserEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
+    @SequenceGenerator(
+            name = "user_seq",
+            sequenceName = "users_seq",
+            allocationSize = 1
+    )
     private Long id;
 
     @Column(nullable = false, length = 50)
@@ -53,8 +55,10 @@ public class UserEntity {
     // ---------------------------
     // Roles (ManyToMany)
     // ---------------------------
+
+
     @ManyToMany(fetch = FetchType.EAGER)
-    @Builder.Default
+
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -107,10 +111,7 @@ public class UserEntity {
         userRoles.add(userRol);
         this.roles=userRoles;
     }
-    public void encodePassword(String password) {
-        var  passwordEncoder =new BCryptPasswordEncoder();
-        this.password= passwordEncoder.encode(password);
-    }
+
     public void deactivateUser(String reason) {
         if(this.status==UserStatus.DEACTIVATED){
             throw new BusinessException(ErrorCode.USER_IS_DEACTIVATE.name(),

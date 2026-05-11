@@ -25,7 +25,7 @@ public class UserDetailImpl implements UserDetails {
                 .stream()
                 .map(role ->
                         new SimpleGrantedAuthority(
-                                "ROLE_" + role.getRole().name()
+                                role.getRole().name()
                         )
                 )
                 .toList();

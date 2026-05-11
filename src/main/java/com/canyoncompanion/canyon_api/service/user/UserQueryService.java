@@ -29,13 +29,6 @@ public interface UserQueryService {
      */
     UserResponseDTO getUserByEmail(String email);
 
-    /**
-     * Retrieves a user by username.
-     *
-     * @param username the user's username
-     * @return the found user
-     */
-    UserResponseDTO getUserByUsername(String username);
 
     /**
      * Retrieves a paginated list of users by role.

@@ -1,5 +1,6 @@
 package com.canyoncompanion.canyon_api.util.mappers;
 
+import com.canyoncompanion.canyon_api.dtos.requests.AuthRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.requests.UserRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.RolesDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.UserResponseDTO;
@@ -14,9 +15,12 @@ import org.mapstruct.ReportingPolicy;
 public interface UserMapper {
 
     UserResponseDTO toUserResponseDTO(UserEntity userEntity);
+
+
     UserEntity toUserEntity(UserRequestDTO userRequestDTO);
     //Roles mapper
     RolesDTO toRolesDTO(RoleEntity roleEntity);
     RoleEntity toRoleEntity(RolesDTO rolesDTO);
 
 }
+

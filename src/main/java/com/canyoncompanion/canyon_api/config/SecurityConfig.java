@@ -54,10 +54,10 @@ public class SecurityConfig {
                 )
 
                 // 🔥 JWT FILTER
-                .addFilterBefore(
+               /* .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
-                )
+                )*/
 
                 .build();
     }

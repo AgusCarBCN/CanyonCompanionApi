@@ -1,6 +1,7 @@
 package com.canyoncompanion.canyon_api.exception;
 
-import com.carnerero.agustin.ecommerceapplication.dtos.responses.ErrorResponse;
+
+import com.canyoncompanion.canyon_api.dtos.responses.ErrorResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,6 +55,7 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request
     ) {
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(
                         ErrorResponse.builder()

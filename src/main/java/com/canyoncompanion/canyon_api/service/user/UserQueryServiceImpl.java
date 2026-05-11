@@ -44,13 +44,7 @@ public class UserQueryServiceImpl implements UserQueryService {
         return userMapper.toUserResponseDTO(userEntity);
     }
 
-    @Override
-    public UserResponseDTO getUserByUsername(String username) {
-        var userEntity=userRepository
-                .findByNameIgnoreCase(username)
-                .orElseThrow(this::userNotFound);
-        return userMapper.toUserResponseDTO(userEntity);
-    }
+
 
     @Override
     public PageResponse<UserResponseDTO> getUsersByRole(String field, Boolean desc, Integer numberOfPages, Roles role) {

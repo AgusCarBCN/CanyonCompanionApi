@@ -60,24 +60,7 @@ public class UserQueriesController {
         return ResponseEntity.ok(user);
     }
 
-    // ---------------------------
-    // Get User by Username
-    // ---------------------------
-    @Operation(
-            summary = "Get user by username",
-            description = "Retrieve user details by username.",
-            security = @SecurityRequirement(name = "Security Token")
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User found"),
-            @ApiResponse(responseCode = "404", description = "User not found"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized access")
-    })
-    @GetMapping("/by-username")
-    public ResponseEntity<UserResponseDTO> getUserByUserName(@RequestParam String userName) {
-        var user = useCase.getUserByUsername(userName);
-        return ResponseEntity.ok(user);
-    }
+
 
     // ---------------------------
     // Get Active Users

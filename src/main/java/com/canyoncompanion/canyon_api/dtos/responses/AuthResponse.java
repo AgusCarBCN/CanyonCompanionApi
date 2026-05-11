@@ -34,7 +34,7 @@ public class AuthResponse {
             description = "Authenticated user's username (email or username)",
             example = "john.doe@example.com"
     )
-    private String userName;
+    private String username;
 
     @Schema(
             description = "List of roles assigned to the user",
