@@ -11,14 +11,20 @@ import java.time.LocalDateTime;
 @Table(name = "descent_images")
 @Getter
 @Setter
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Slf4j
 public class DescentImageEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //@GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "descent_images_seq")
+    @SequenceGenerator(
+            name = "descent_images_seq",
+            sequenceName = "descent_images_seq",
+            allocationSize = 1
+    )
+
     private Long id;
 
     // =========================
@@ -44,8 +50,14 @@ public class DescentImageEntity {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    @PrePersist
+    public void prePersist() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
     @PreUpdate
     public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 }

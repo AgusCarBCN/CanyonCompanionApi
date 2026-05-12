@@ -5,84 +5,59 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
-/**
- * Repository responsible for database access related to descents.
- *
- * Contains public and private queries used throughout
- * the application for canyon/descent management.
- */
-public interface DescentRepository
-        extends JpaRepository<DescentEntity, Long> {
+public interface DescentRepository extends JpaRepository<DescentEntity, Long> {
+
+    // =====================================================
+    // OWNERSHIP QUERIES (DESCENSOS DEL USUARIO)
+    // =====================================================
 
     /**
-     * Retrieves all descents using pagination.
-     *
-     * Main use cases:
-     * - public descent listing
-     * - exploration feed
-     * - infinite scroll
+     * Devuelve todos los descensos de un usuario con paginación.
+     * Usado para "Mis descensos".
      */
-    @Override
+    Page<DescentEntity> findAllByUserId(Long userId, Pageable pageable);
+
+    /**
+     * Devuelve todos los descensos de un usuario sin paginación.
+     * Útil en casos simples o internos.
+     */
+    List<DescentEntity> findAllByUserId(Long userId);
+
+    /**
+     * Verifica si un descenso pertenece a un usuario.
+     * Útil para validación rápida de permisos (ownership).
+     */
+    boolean existsByIdAndUserId(Long id, Long userId);
+
+    // =====================================================
+    // PUBLIC QUERIES (LISTADOS Y BÚSQUEDA)
+    // =====================================================
+
+    /**
+     * Devuelve todos los descensos con paginación.
+     * Usado para feed público.
+     */
     Page<DescentEntity> findAll(Pageable pageable);
 
     /**
-     * Searches descents by name.
-     *
-     * Features:
-     * - case-insensitive
-     * - partial matching
-     *
-     * Example:
-     * "fou" -> "Barranco de la Fou"
+     * Filtra descensos por provincia (case insensitive).
+     * Usado para búsquedas geográficas.
      */
-    Page<DescentEntity> findByNameContainingIgnoreCase(
-            String name,
-            Pageable pageable
-    );
+    Page<DescentEntity> findByProvinceIgnoreCase(String province, Pageable pageable);
 
     /**
-     * Retrieves descents belonging to a specific user.
-     *
-     * Main use cases:
-     * - public user profiles
-     * - viewing another user's descents
+     * Búsqueda por nombre parcial (case insensitive).
+     * Útil para buscador de la app.
      */
-    Page<DescentEntity> findByUserId(
-            Long userId,
-            Pageable pageable
-    );
+    Page<DescentEntity> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
     /**
-     * Retrieves descents owned by the authenticated user.
-     *
-     * Uses the authenticated user's email
-     * from the security context.
-     *
-     * Main use cases:
-     * - "My Descents" section
-     * - authenticated endpoints
+     * Búsqueda por ubicación parcial (case insensitive).
+     * Permite buscar por ciudad o zona.
      */
-    Page<DescentEntity> findByUserEmail(
-            String email,
-            Pageable pageable
-    );
-
-    /**
-     * Retrieves a descent only if it belongs
-     * to the authenticated user.
-     *
-     * Main use cases:
-     * - secure update operations
-     * - secure delete operations
-     * - ownership validation
-     *
-     * Prevents users from modifying
-     * descents owned by others.
-     */
-    Optional<DescentEntity> findByIdAndUserEmail(
-            Long id,
-            String email
-    );
+    Page<DescentEntity> findByLocationContainingIgnoreCase(String location, Pageable pageable);
+    
 }

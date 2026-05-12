@@ -19,8 +19,15 @@ import java.util.List;
 @Slf4j
 @Table(name = "descents")
 public class DescentEntity {
+
+   //@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "descent_seq")
+    @SequenceGenerator(
+            name = "descent_seq",
+            sequenceName = "descents_seq",
+            allocationSize = 1
+    )
     private Long id;
 
     // =========================

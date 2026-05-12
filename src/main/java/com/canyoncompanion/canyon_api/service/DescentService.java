@@ -5,30 +5,22 @@ package com.canyoncompanion.canyon_api.service;
 import com.canyoncompanion.canyon_api.dtos.requests.DescentRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.DescentResponseDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.PageResponse;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
-/**
- * Service interface for managing descents (canyons).
- *
- * Defines the core business operations:
- * - creation
- * - retrieval
- * - update
- * - deletion
- *
- * All write operations are secured so that only
- * the owner of a descent can modify it.
- */
+import com.canyoncompanion.canyon_api.model.entities.DescentEntity;
 public interface DescentService {
 
+    // =====================================================
+    // READ
+    // =====================================================
+
     /**
-     * Retrieves all descents with pagination.
+     * Retrieves all descents (public feed) with pagination and sorting.
      */
-    PageResponse<DescentResponseDTO> getAllDescents(String field,
-                                                    Boolean desc,
-                                                    Integer page,
-                                                    Integer size);
+    PageResponse<DescentResponseDTO> getAllDescents(
+            String field,
+            Boolean desc,
+            Integer page,
+            Integer size
+    );
 
     /**
      * Retrieves a single descent by its ID.
@@ -36,33 +28,60 @@ public interface DescentService {
     DescentResponseDTO getDescentById(Long descentId);
 
     /**
-     * Retrieves descents belonging to the authenticated user.
+     * Retrieves descents owned by the authenticated user.
      */
-    PageResponse<DescentResponseDTO> getMyDescents(String email,String field,
-                                                   Boolean desc,
-                                                   Integer page,
-                                                   Integer size );
+    PageResponse<DescentResponseDTO> getMyDescents(
+            String field,
+            Boolean desc,
+            Integer page,
+            Integer size
+    );
+
+    // =====================================================
+    // CREATE
+    // =====================================================
 
     /**
      * Creates a new descent for the authenticated user.
      */
-    DescentResponseDTO createDescent(String email, DescentRequestDTO dto);
+    DescentResponseDTO createDescent(DescentRequestDTO dto);
+
+    // =====================================================
+    // UPDATE
+    // =====================================================
 
     /**
-     * Updates an existing descent.
-     *
-     * Only allowed if the descent belongs to the authenticated user.
+     * Updates a descent.
+     * Only allowed if the authenticated user is the owner.
      */
     DescentResponseDTO updateDescent(
             Long descentId,
-            String email,
             DescentRequestDTO dto
     );
 
+    // =====================================================
+    // DELETE
+    // =====================================================
+
     /**
      * Deletes a descent.
-     *
-     * Only allowed if the descent belongs to the authenticated user.
+     * Only allowed if the authenticated user is the owner.
      */
-    void deleteDescent(Long descentId, String email);
+    void deleteDescent(Long descentId);
+
+    // =====================================================
+    // IMAGES
+    // =====================================================
+
+    /**
+     * Adds an image to a descent.
+     * Only owner can modify.
+     */
+    DescentResponseDTO addImage(Long descentId, String imageUrl);
+
+    /**
+     * Removes an image from a descent.
+     * Only owner can modify.
+     */
+    DescentResponseDTO removeImage(Long descentId, Long imageId);
 }

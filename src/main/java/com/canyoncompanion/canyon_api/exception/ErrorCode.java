@@ -18,8 +18,8 @@ public enum ErrorCode {
     TOO_MANY_ITEMS("Cannot remove more items than ordered"),
     EMAIL_ALREADY_EXISTS("Email already registered"),
     INVALID_FIELD("Invalid field"),
-    INVALID_REFRESH_TOKEN("Invalid refresh token");
-
+    INVALID_REFRESH_TOKEN("Invalid refresh token"),
+    NO_OWNER_DESCENT("Only the owner of the descent can perform this action"),;
     private final String defaultMessage;
 
     ErrorCode(String defaultMessage) {

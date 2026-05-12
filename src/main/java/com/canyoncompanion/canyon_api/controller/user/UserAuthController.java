@@ -15,7 +15,6 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,7 +38,7 @@ public class UserAuthController {
             @ApiResponse(responseCode = "400", description = "Invalid request or email already exists")
     })
     @PostMapping("/register/user")
-    @PreAuthorize("permitAll()")
+
     public ResponseEntity<AuthResponse> registerUser(
             @RequestBody @Valid UserRequestDTO userRequestDTO
     ) {
@@ -61,7 +60,7 @@ public class UserAuthController {
             @ApiResponse(responseCode = "401", description = "Invalid email or password")
     })
     @PostMapping("/login")
-    @PreAuthorize("permitAll()") // Permite que cualquier usuario (incluso no autenticado) acceda a este endpoint
+
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthRequestDTO request) {
 
         // 6️⃣ Devolver la respuesta HTTP 200 con los tokens y la info del usuario
@@ -84,7 +83,7 @@ public class UserAuthController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     @PostMapping("/refresh-token")
-    @PreAuthorize("permitAll()")
+
     public ResponseEntity<AuthResponse> refreshToken(@RequestBody TokenRequestDTO request) {
 
         var response=registrationService.refreshToken(request);
@@ -104,7 +103,7 @@ public class UserAuthController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     @PostMapping("/logout")
-    @PreAuthorize("permitAll()")
+
     public ResponseEntity<Void> logout(@RequestBody TokenRequestDTO request) {
 
         registrationService.logout(request);
@@ -123,7 +122,7 @@ public class UserAuthController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     @GetMapping("/me")
-    @PreAuthorize("permitAll()")
+
     public ResponseEntity<UserResponseDTO> me(Authentication authentication) {
 
         var response = registrationService.me(authentication);
