@@ -29,13 +29,38 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     @Nullable
     public RefreshTokenEntity findByToken(@Nullable String token) {
+
+        RefreshTokenEntity refreshToken = repository.findByToken(token)
+                .orElseThrow(() -> new BusinessException(
+                        "Invalid refresh token",
+                        "REFRESH_TOKEN_INVALID",
+                        HttpStatus.UNAUTHORIZED
+                ));
+
+        if (refreshToken.getExpiryDate().isBefore(Instant.now())) {
+
+            repository.delete(refreshToken);
+
+            throw new BusinessException(
+                    "Refresh token expired",
+                    "REFRESH_TOKEN_EXPIRED",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        return refreshToken;
+    }
+
+    /*@Override
+    @Nullable
+    public RefreshTokenEntity findByToken(@Nullable String token) {
         return repository.findByToken(token)
                 .orElseThrow(() -> new BusinessException(
                         "Invalid refresh token",
                         "REFRESH_TOKEN_INVALID",
                         HttpStatus.UNAUTHORIZED
                 ));
-    }
+    }*/
 
     @Override
     @Nullable

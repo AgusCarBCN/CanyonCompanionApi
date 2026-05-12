@@ -5,11 +5,14 @@ import com.canyoncompanion.canyon_api.dtos.requests.AuthRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.requests.TokenRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.requests.UserRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.AuthResponse;
+import com.canyoncompanion.canyon_api.dtos.responses.UserResponseDTO;
 import com.canyoncompanion.canyon_api.exception.BusinessException;
 import com.canyoncompanion.canyon_api.exception.ErrorCode;
+import com.canyoncompanion.canyon_api.model.entities.RefreshTokenEntity;
 import com.canyoncompanion.canyon_api.model.entities.RoleEntity;
 import com.canyoncompanion.canyon_api.model.entities.UserEntity;
 import com.canyoncompanion.canyon_api.model.enums.Roles;
+import com.canyoncompanion.canyon_api.repository.RefreshTokenRepository;
 import com.canyoncompanion.canyon_api.repository.RoleRepository;
 import com.canyoncompanion.canyon_api.repository.UserRepository;
 import com.canyoncompanion.canyon_api.security.JwtService;
@@ -20,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -39,6 +43,7 @@ public class UserAuthServiceImpl implements UserAuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final UserMapper userMapper;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
@@ -105,9 +110,35 @@ public class UserAuthServiceImpl implements UserAuthService {
                 userDetailsService.loadUserByUsername(refreshToken.getUser().getEmail());
 
         String newAccessToken = jwtService.generateToken(userDetails);
-        String newRefreshToken = refreshTokenService.createOrRefreshToken(userDetails);
+        String newRefreshToken = refreshTokenService.rotateToken(refreshToken);
+        //String newRefreshToken = refreshTokenService.createOrRefreshToken(userDetails);
 
         return buildAuthResponse(userDetails, newAccessToken, newRefreshToken);
+    }
+
+    @Override
+    public void logout(TokenRequestDTO request)
+    {
+        RefreshTokenEntity refreshToken = refreshTokenService.findByToken(request.getToken());
+        refreshTokenRepository.delete(refreshToken);
+    }
+
+    @Override
+    public UserResponseDTO me(Authentication authentication) {
+        String email = authentication.getName();
+
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.USER_NOT_FOUND.name(),
+                        ErrorCode.USER_NOT_FOUND.getDefaultMessage(),
+                        HttpStatus.NOT_FOUND
+                ));
+
+        return UserResponseDTO.builder()
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .surname(user.getSurname())
+                .build();
     }
 
     // =====================================================
@@ -157,7 +188,7 @@ public class UserAuthServiceImpl implements UserAuthService {
                         .toList())
                 .build();
     }
-    public Set<RoleEntity> buildRoles(boolean isAdmin) {
+    private Set<RoleEntity> buildRoles(boolean isAdmin) {
 
         Set<RoleEntity> roles = new HashSet<>();
 

@@ -51,20 +51,20 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneric(
+    public ResponseEntity<String/*ErrorResponse*/> handleGeneric(
             Exception ex,
             HttpServletRequest request
     ) {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(
-                        ErrorResponse.builder()
+                .body(ex.getMessage());
+                        /*ErrorResponse.builder()
                                 .code("INTERNAL_ERROR")
                                 .message("Unexpected error occurred")
                                 .timestamp(LocalDateTime.now())
                                 .path(request.getRequestURI())
                                 .build()
-                );
+                );*/
     }
 
     @ExceptionHandler(ExpiredJwtException.class)

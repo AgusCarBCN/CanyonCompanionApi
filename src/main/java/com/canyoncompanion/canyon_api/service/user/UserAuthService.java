@@ -5,7 +5,9 @@ import com.canyoncompanion.canyon_api.dtos.requests.AuthRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.requests.TokenRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.requests.UserRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.AuthResponse;
+import com.canyoncompanion.canyon_api.dtos.responses.UserResponseDTO;
 import com.canyoncompanion.canyon_api.exception.BusinessException;
+import org.springframework.security.core.Authentication;
 
 public interface UserAuthService {
 
@@ -41,7 +43,22 @@ public interface UserAuthService {
      * @param request
      * @return
      */
-    public AuthResponse refreshToken(TokenRequestDTO request);
+    AuthResponse refreshToken(TokenRequestDTO request);
+
+    /**
+     * Logout session
+     *
+     * @param refreshToken
+     */
+    void logout(TokenRequestDTO refreshToken);
+
+    /**
+     * Get
+     * @param authentication
+     * @return
+     */
+    UserResponseDTO me(Authentication authentication);
+
 
     boolean resendVerificationEmail(String email);
 
