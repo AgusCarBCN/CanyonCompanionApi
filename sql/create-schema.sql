@@ -7,6 +7,18 @@ CREATE SEQUENCE users_seq START 1;
 CREATE SEQUENCE descents_seq START 1;
 CREATE SEQUENCE descent_images_seq START 1;
 CREATE SEQUENCE refresh_seq START 1;
+CREATE SEQUENCE maps_seq START 1 INCREMENT 1;
+
+-- ==============================================
+-- MAPS
+-- ==============================================
+
+CREATE TABLE maps (
+                      id BIGINT PRIMARY KEY DEFAULT nextval('maps_seq'),
+                      name VARCHAR(120) NOT NULL,
+                      mbtiles_path VARCHAR(255) NOT NULL,
+                      image_path VARCHAR(255) NOT NULL
+);
 
 -- ==============================================
 -- ROLES
