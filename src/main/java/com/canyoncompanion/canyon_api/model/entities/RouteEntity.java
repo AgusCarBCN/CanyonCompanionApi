@@ -4,28 +4,43 @@ package com.canyoncompanion.canyon_api.model.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@Slf4j
 @Table(name = "routes")
 public class RouteEntity {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "descent_id", nullable = false)
+    // 👤 propietario de la ruta (OBLIGATORIO)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
+
+    // 🧗 descenso opcional
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "descent_id")
     private DescentEntity descent;
 
+    // 🗺️ waypoints
+    @OneToMany(
+            mappedBy = "route",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<WaypointEntity> waypoints = new ArrayList<>();
+
+    // 📌 datos básicos
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false)
@@ -34,10 +49,16 @@ public class RouteEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    // 📊 métricas del tracking (cliente)
     private Long time;
     private Double distance;
-    private Float ascent;
-    //private Float descent;
 
+    @Column(name = "ascent")
+    private Float totalAscent;
+
+    @Column(name = "descent")
+    private Float totalDescent;
+
+    // 📅 fecha creación
     private LocalDateTime date = LocalDateTime.now();
 }

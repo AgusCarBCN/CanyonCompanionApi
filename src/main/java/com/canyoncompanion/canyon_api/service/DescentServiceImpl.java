@@ -35,6 +35,7 @@ public class DescentServiceImpl implements DescentService {
     private final DescentMapper descentMapper;
     private final DescentImageMapper descentImageMapper;
     private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
 
 
     @Override
@@ -66,7 +67,7 @@ public class DescentServiceImpl implements DescentService {
     @Transactional
     @Override
     public DescentResponseDTO createDescent(DescentRequestDTO dto) {
-        val user = getCurrentUser();
+        val user = currentUserService.getCurrentUser();//getCurrentUser();
         val descentEntity = descentMapper.toEntity(dto);
         descentEntity.setUser(user);
         descentEntity.setCreatedAt(LocalDateTime.now());

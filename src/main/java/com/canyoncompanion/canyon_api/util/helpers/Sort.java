@@ -32,6 +32,16 @@ public final class Sort {
             "status"
     );
 
+    private static final Set<String> allowedRouteFields = Set.of(
+            "name",
+            "resourcePath",
+            "time",
+            "distance",
+            "totalAscent",
+            "totalDescent",
+            "date"
+    );
+
     public static org.springframework.data.domain.Sort getDescentSort(String field,
                                                                       Boolean desc
                                                                ) {
@@ -44,11 +54,23 @@ public final class Sort {
         }
     }
     public static org.springframework.data.domain.Sort getUserSort(String field,
-                                                                      Boolean desc
+                                                                       Boolean desc
     ) {
         if (allowedUserFields.contains(field)) {
             return desc? org.springframework.data.domain.Sort.by(field).descending(): org.springframework.data.domain.Sort.by(field).ascending();
         }else{
+            throw new BusinessException(ErrorCode.INVALID_FIELD.name(),
+                    ErrorCode.INVALID_FIELD.getDefaultMessage(),
+                    HttpStatus.NOT_ACCEPTABLE);
+        }
+    }
+
+    public static org.springframework.data.domain.Sort getRouteSort(String field,
+                                                                    Boolean desc
+    ) {
+        if (allowedRouteFields.contains(field)) {
+            return desc ? org.springframework.data.domain.Sort.by(field).descending() : org.springframework.data.domain.Sort.by(field).ascending();
+        } else {
             throw new BusinessException(ErrorCode.INVALID_FIELD.name(),
                     ErrorCode.INVALID_FIELD.getDefaultMessage(),
                     HttpStatus.NOT_ACCEPTABLE);

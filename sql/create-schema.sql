@@ -142,25 +142,36 @@ CREATE TABLE descent_images (
 CREATE TABLE routes (
                         id BIGSERIAL PRIMARY KEY,
 
-                        descent_id BIGINT NOT NULL,
+    -- 👤 propietario de la ruta
+                        user_id BIGINT NOT NULL,
 
+    -- 🧗 descenso opcional (puede asignarse después)
+                        descent_id BIGINT NULL,
+
+    -- 📌 datos de la ruta
                         name VARCHAR(255) NOT NULL,
-
                         resource_path TEXT NOT NULL,
-
                         description TEXT,
 
+    -- 📊 métricas (calculadas en el cliente)
                         time BIGINT,
                         distance DOUBLE PRECISION,
                         ascent REAL,
                         descent REAL,
 
+    -- 📅 fecha creación
                         date TIMESTAMP DEFAULT NOW(),
+
+    -- 🔗 relaciones
+                        CONSTRAINT fk_routes_user
+                            FOREIGN KEY (user_id)
+                                REFERENCES users(id)
+                                ON DELETE CASCADE,
 
                         CONSTRAINT fk_routes_descent
                             FOREIGN KEY (descent_id)
                                 REFERENCES descents(id)
-                                ON DELETE CASCADE
+                                ON DELETE SET NULL
 );
 
 -- ==============================================

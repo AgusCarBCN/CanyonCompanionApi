@@ -44,11 +44,5 @@ public class MapController {
 
         return ResponseEntity.ok(maps);
     }
-    /*@GetMapping
-    public ResponseEntity<List<MapResponseDTO>> getAllMaps() {
-        System.out.println("👉 CONTROLLER /api/maps HIT");
-        return ResponseEntity.ok(
-                mapService.getAllMaps()
-        );
-    }*/
+
 }

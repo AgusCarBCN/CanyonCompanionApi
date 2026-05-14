@@ -1,0 +1,42 @@
+package com.canyoncompanion.canyon_api.util.mappers;
+
+
+import com.canyoncompanion.canyon_api.dtos.requests.RouteRequestDTO;
+import com.canyoncompanion.canyon_api.dtos.requests.WaypointRequestDTO;
+import com.canyoncompanion.canyon_api.dtos.responses.RouteResponseDTO;
+import com.canyoncompanion.canyon_api.dtos.responses.WaypointResponseDTO;
+import com.canyoncompanion.canyon_api.model.entities.RouteEntity;
+import com.canyoncompanion.canyon_api.model.entities.WaypointEntity;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+import java.util.List;
+
+@Mapper(componentModel = "spring")
+public interface RouteMapper {
+
+    // =====================================
+    // ENTITY → RESPONSE
+    // =====================================
+
+    @Mapping(source = "descent.id", target = "descentId")
+    @Mapping(source = "descent.name", target = "descentName")
+    RouteResponseDTO toResponse(RouteEntity entity);
+
+    WaypointResponseDTO toWaypointResponse(WaypointEntity entity);
+
+    List<WaypointResponseDTO> toWaypointResponseList(List<WaypointEntity> entities);
+
+    // =====================================
+    // REQUEST → ENTITY
+    // =====================================
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "descent", ignore = true)
+    @Mapping(target = "waypoints", ignore = true)
+    RouteEntity toEntity(RouteRequestDTO dto);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "route", ignore = true)
+    WaypointEntity toWaypointEntity(WaypointRequestDTO dto);
+}

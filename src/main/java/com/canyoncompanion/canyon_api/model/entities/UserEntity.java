@@ -57,7 +57,6 @@ public class UserEntity {
     // Roles (ManyToMany)
     // ---------------------------
 
-
     @ManyToMany(fetch = FetchType.EAGER)
     @Builder.Default
     @JoinTable(
