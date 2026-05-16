@@ -19,7 +19,8 @@ public enum ErrorCode {
     EMAIL_ALREADY_EXISTS("Email already registered"),
     INVALID_FIELD("Invalid field"),
     INVALID_REFRESH_TOKEN("Invalid refresh token"),
-    NO_OWNER_DESCENT("Only the owner of the descent can perform this action"),;
+    NO_OWNER_DESCENT("Only the owner of the descent can perform this action"),
+    FORBIDDEN("You do not have permission to perform this action");
     private final String defaultMessage;
 
     ErrorCode(String defaultMessage) {

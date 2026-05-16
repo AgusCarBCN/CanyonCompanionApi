@@ -24,11 +24,10 @@ public class MapController {
     private final MapService mapService;
 
     @Operation(
-            summary = "Get all offline maps",
+            summary = "Get all offline maps(public feed)",
             description = "Returns all available offline maps with their associated MBTiles and preview image paths"
     )
     @ApiResponses(value = {
-
             @ApiResponse(
                     responseCode = "200",
                     description = "Offline maps retrieved successfully"

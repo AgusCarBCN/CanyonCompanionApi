@@ -9,8 +9,33 @@ import java.util.List;
 
 public interface RouteService {
 
-   // RouteResponseDTO createRoute(RouteRequestDTO dto);
+    // =====================================================
+    // CREATE
+    // =====================================================
+    RouteResponseDTO createRoute(RouteRequestDTO dto);
 
+    // =====================================================
+    // UPDATE
+    // =====================================================
+    RouteResponseDTO updateRoute(Long id, RouteRequestDTO dto);
+
+    // =====================================================
+    // DELETE
+    // =====================================================
+    void deleteRoute(Long id);
+
+    // =====================================================
+    // GET MY ROUTES
+    // =====================================================
+    PageResponse<RouteResponseDTO> getMyRoutes(
+            String field,
+            Boolean desc,
+            Integer page,
+            Integer size
+    );
+    // =====================================================
+    // PUBLIC METHODS
+    // =====================================================
     PageResponse<RouteResponseDTO> getAllRoutes(
             String field,
             Boolean desc,
@@ -18,7 +43,15 @@ public interface RouteService {
             Integer size
     );
 
-    RouteResponseDTO getRouteById(Long routeId);
+    RouteResponseDTO getRouteById(Long id);
+
+    PageResponse<RouteResponseDTO> getRoutesByDescentId(
+            Long descentId,
+            String field,
+            Boolean desc,
+            Integer page,
+            Integer size
+    );
 
     PageResponse<RouteResponseDTO> getRoutesByUserId(
 
@@ -28,17 +61,4 @@ public interface RouteService {
             Integer size
     );
 
-    PageResponse<RouteResponseDTO> getRoutesByDescentId(
-            Long descentId,
-            String field,
-            Boolean desc,
-            Integer page,
-            Integer size
-    );
-    RouteResponseDTO createRoute(RouteRequestDTO dto);
-
-
-   // PageResponse<RouteResponseDTO> getAllRoutes(RouteFilterRequest filter);
-
-   // PageResponse<RouteResponseDTO> getRoutesByDescentId(RouteFilterRequest filter, Long descentId);
 }

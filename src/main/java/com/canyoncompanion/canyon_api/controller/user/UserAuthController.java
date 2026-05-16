@@ -30,14 +30,14 @@ public class UserAuthController {
     // ---------------------------
     @Operation(
             summary = "Register a new user",
-            description = "Registers a new user and immediately authenticates them, returning access and refresh tokens.",
-            security = @SecurityRequirement(name = "")
+            description = "Registers a new user and immediately authenticates them, returning access and refresh tokens."
+
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "User registered successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request or email already exists")
     })
-    @PostMapping("/register/user")
+    @PostMapping("/register")
 
     public ResponseEntity<AuthResponse> registerUser(
             @RequestBody @Valid UserRequestDTO userRequestDTO
@@ -52,8 +52,8 @@ public class UserAuthController {
     // ---------------------------
     @Operation(
             summary = "User login",
-            description = "Authenticates a user with email and password, returning access and refresh tokens.",
-            security = @SecurityRequirement(name = "")
+            description = "Authenticates a user with email and password, returning access and refresh tokens."
+
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User authenticated successfully"),
@@ -75,14 +75,14 @@ public class UserAuthController {
     @Operation(
             summary = "Refresh access token",
             description = "Generates a new access token using a valid refresh token. The refresh token remains the same.",
-            security = @SecurityRequirement(name = "")
+            security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Access token refreshed successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid refresh token"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @PostMapping("/refresh-token")
+    @PostMapping("/refresh")
 
     public ResponseEntity<AuthResponse> refreshToken(@RequestBody TokenRequestDTO request) {
 
@@ -95,7 +95,7 @@ public class UserAuthController {
     @Operation(
             summary = "User logout",
             description = "Invalidates the current refresh token, effectively logging the user out.",
-            security = @SecurityRequirement(name = "")
+            security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User logged out successfully"),
@@ -114,8 +114,8 @@ public class UserAuthController {
 // ---------------------------
     @Operation(
             summary = "Get authenticated user",
-            description = "Returns the data of the currently authenticated user.",
-            security = @SecurityRequirement(name = "")
+            description = "Returns the currently authenticated user",
+            security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Authenticated user returned successfully"),

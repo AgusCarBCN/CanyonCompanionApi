@@ -27,33 +27,37 @@ public class LoadingAdminUser {
 
     @Bean
     public CommandLineRunner loadData() {
+        return args -> {
 
-        return (args) -> {
-            //Guarda usuario admin si no existe
-            if (!userRepository.existsByEmailIgnoreCase("agusticar@gmail.com")) {
+            RoleEntity adminRole = roleRepository.findByRole(Roles.ROLE_ADMIN)
+                    .orElseGet(() -> roleRepository.save(
+                            RoleEntity.builder()
+                                    .role(Roles.ROLE_ADMIN)
+                                    .build()
+                    ));
 
-                RoleEntity adminRole = roleRepository.findByRole(Roles.ROLE_ADMIN)
-                        .orElseThrow();
-                    // save an admin user
-                    UserEntity admin=UserEntity.builder()
-                            .username("admin")
-                            .surname("admin")
-                            .email("agusticar@gmail.com")
-                            .password(passwordEncoder.encode("Admin123$$"))
-                            .status(UserStatus.ACTIVE)
-                            .statusDescription("Default admin")
-                            .createdAt(LocalDateTime.now())
-                            .updatedAt(LocalDateTime.now())
-                            .roles(Set.of(adminRole))
-                            .build();
+            boolean userExists = userRepository.existsByEmailIgnoreCase("agusticar@gmail.com");
+
+            if (!userExists) {
+
+                UserEntity admin = UserEntity.builder()
+                        .username("admin")
+                        .surname("admin")
+                        .email("agusticar@gmail.com")
+                        .password(passwordEncoder.encode("Admin123$$"))
+                        .status(UserStatus.ACTIVE)
+                        .statusDescription("Default admin")
+                        .createdAt(LocalDateTime.now())
+                        .updatedAt(LocalDateTime.now())
+                        .roles(Set.of(adminRole))
+                        .build();
+
                 userRepository.save(admin);
 
                 log.info("Admin user created");
-
-                } else {
+            } else {
                 log.info("Admin user already exists");
-                }
-
+            }
         };
     }
 }

@@ -8,6 +8,7 @@ import com.canyoncompanion.canyon_api.exception.BusinessException;
 import com.canyoncompanion.canyon_api.exception.ErrorCode;
 import com.canyoncompanion.canyon_api.model.entities.DescentEntity;
 import com.canyoncompanion.canyon_api.model.entities.RouteEntity;
+import com.canyoncompanion.canyon_api.model.entities.UserEntity;
 import com.canyoncompanion.canyon_api.model.entities.WaypointEntity;
 import com.canyoncompanion.canyon_api.repository.DescentRepository;
 import com.canyoncompanion.canyon_api.repository.RouteRepository;
@@ -18,10 +19,12 @@ import com.canyoncompanion.canyon_api.util.mappers.RouteMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.RouteMatcher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +79,72 @@ public class RouteServiceImpl implements RouteService {
 
         // 📤 response
         return routeMapper.toResponse(saved);
+
+    }
+
+    @Override
+    public RouteResponseDTO updateRoute(Long id, RouteRequestDTO dto) {
+        UserEntity user = currentUserService.getCurrentUser();
+
+        RouteEntity route = routeRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(
+                        "Route not found",
+                        ErrorCode.ROUTE_NOT_FOUND.getDefaultMessage(),
+                        HttpStatus.NOT_FOUND
+                ));
+
+        // 🔒 OWNERSHIP CHECK
+        if (!route.getUser().getId().equals(user.getId())) {
+            throw new BusinessException(
+                    "You are not the owner of this route",
+                    ErrorCode.FORBIDDEN.getDefaultMessage(),
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
+        // 🔄 UPDATE FIELDS
+        route.setName(dto.getName());
+        route.setDescription(dto.getDescription());
+
+
+        RouteEntity saved = routeRepository.save(route);
+
+        return routeMapper.toResponse(saved);
+
+    }
+
+    @Override
+    public void deleteRoute(Long id) {
+        UserEntity user = currentUserService.getCurrentUser();
+        RouteEntity route = routeRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(
+                        "Route not found",
+                        ErrorCode.ROUTE_NOT_FOUND.getDefaultMessage(),
+                        HttpStatus.NOT_FOUND
+                ));
+
+        // 🔒 OWNERSHIP CHECK
+        if (!route.getUser().getId().equals(user.getId())) {
+            throw new BusinessException(
+                    "You are not the owner of this route",
+                    ErrorCode.FORBIDDEN.getDefaultMessage(),
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
+        routeRepository.delete(route);
+    }
+
+    @Override
+    public PageResponse<RouteResponseDTO> getMyRoutes(String field, Boolean desc, Integer page, Integer size) {
+        UserEntity user = currentUserService.getCurrentUser();
+        org.springframework.data.domain.Sort sort = Sort.getRouteSort(field, desc);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        var routesPage = routeRepository.findByUserId(user.getId(), pageable)
+                .map(routeMapper::toResponse);
+
+        return PageResponseMapper.mapToPageResponse(routesPage);
 
     }
 

@@ -51,16 +51,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         return refreshToken;
     }
 
-    /*@Override
-    @Nullable
-    public RefreshTokenEntity findByToken(@Nullable String token) {
-        return repository.findByToken(token)
-                .orElseThrow(() -> new BusinessException(
-                        "Invalid refresh token",
-                        "REFRESH_TOKEN_INVALID",
-                        HttpStatus.UNAUTHORIZED
-                ));
-    }*/
 
     @Override
     @Nullable
@@ -74,8 +64,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Nullable
     public String rotateToken(@Nullable RefreshTokenEntity oldToken) {
         // 1. invalidate previous token
-        repository.delete(oldToken);
-
+        if (oldToken != null) {
+            repository.deleteByUser(oldToken.getUser());
+        }
         // 2. generate new token
         return generateAndSaveToken(oldToken.getUser());
     }

@@ -26,6 +26,15 @@ public class DescentController {
     // =====================================================
     // GET ALL (PUBLIC FEED)
     // =====================================================
+    @Operation(
+            summary = "Get all descents (public feed)"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "descents retrieved successfully"
+            )
+    })
     @GetMapping
 
     public ResponseEntity<PageResponse<DescentResponseDTO>> getAllDescents(
@@ -42,6 +51,18 @@ public class DescentController {
     // =====================================================
     // GET BY ID
     // =====================================================
+    @Operation(
+            summary = "Get descent by id"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "user's descent retrieved successfully"
+            ),
+            @ApiResponse(responseCode = "404",
+                         description = "Descent not found")
+
+    })
     @GetMapping("/{id}")
 
     public ResponseEntity<DescentResponseDTO> getById(
@@ -55,6 +76,20 @@ public class DescentController {
     // =====================================================
     // MY DESCENTS (AUTH USER)
     // =====================================================
+    @Operation(
+            summary = "Get my descents",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "404",
+                    description = "Descent not found"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "descents retrieved successfully"
+            )
+    })
     @GetMapping("/me")
 
     public ResponseEntity<PageResponse<DescentResponseDTO>> getMyDescents(
@@ -71,6 +106,15 @@ public class DescentController {
     // =====================================================
     // CREATE DESCENT
     // =====================================================
+    @Operation(
+            summary = "Create descent",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Descent registered successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @PostMapping
 
     public ResponseEntity<DescentResponseDTO> createDescent(
@@ -83,6 +127,15 @@ public class DescentController {
     // =====================================================
     // UPDATE DESCENT
     // =====================================================
+    @Operation(
+            summary = "Update descent",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Descent updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @PutMapping("/{id}")
 
     public ResponseEntity<DescentResponseDTO> updateDescent(
@@ -97,6 +150,15 @@ public class DescentController {
     // =====================================================
     // DELETE DESCENT
     // =====================================================
+    @Operation(
+            summary = "Delete descent",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Descent removed successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @DeleteMapping("/{id}")
 
     public ResponseEntity<Void> deleteDescent(
@@ -109,6 +171,15 @@ public class DescentController {
     // =====================================================
     // ADD IMAGE
     // =====================================================
+    @Operation(
+            summary = "Add image to descent",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Image added successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @PostMapping("/{id}/images")
     public ResponseEntity<DescentResponseDTO> addImage(
             @PathVariable Long id,
@@ -122,6 +193,15 @@ public class DescentController {
     // =====================================================
     // REMOVE IMAGE
     // =====================================================
+    @Operation(
+            summary = "Remove image from descent",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Image removed successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @DeleteMapping("/{id}/images/{imageId}")
     public ResponseEntity<DescentResponseDTO> removeImage(
             @PathVariable Long id,

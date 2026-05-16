@@ -17,6 +17,8 @@ public class CurrentUserService {
     private final UserRepository userRepository;
 
     public UserEntity getCurrentUser() {
+
+
         String email = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getName();
