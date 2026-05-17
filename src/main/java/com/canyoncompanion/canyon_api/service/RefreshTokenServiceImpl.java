@@ -23,6 +23,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     private final RefreshTokenRepository repository;
     private final UserRepository userRepository;
 
+
     // =====================================================
     // FIND TOKEN
     // =====================================================
@@ -37,8 +38,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                         HttpStatus.UNAUTHORIZED
                 ));
 
+        // solo afecta a este token, no a toda la cuenta
         if (refreshToken.getExpiryDate().isBefore(Instant.now())) {
-
             repository.delete(refreshToken);
 
             throw new BusinessException(
@@ -51,25 +52,53 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         return refreshToken;
     }
 
-
+    // =====================================================
+    // LOGIN FLOW (crear sesión nueva)
+    // =====================================================
     @Override
-    @Nullable
-    public String createOrRefreshToken(@Nullable UserDetails userDetails) {
+    public String generateLoginToken(@Nullable UserDetails userDetails) {
+
         UserEntity user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found")); // or appropriate exception
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // si quieres 1 sola sesión por usuario
+        repository.deleteByUser(user);
+
         return generateAndSaveToken(user);
     }
 
+
+    // =====================================================
+    // REFRESH FLOW (rotación real)
+    // =====================================================
     @Override
-    @Nullable
     public String rotateToken(@Nullable RefreshTokenEntity oldToken) {
-        // 1. invalidate previous token
-        if (oldToken != null) {
-            repository.deleteByUser(oldToken.getUser());
+
+        if (oldToken == null || oldToken.getUser() == null) {
+            throw new BusinessException(
+                    "Invalid refresh token",
+                    "REFRESH_TOKEN_INVALID",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
-        // 2. generate new token
+
+        // opcional pero recomendable: validar expiración aquí también
+        if (oldToken.getExpiryDate().isBefore(Instant.now())) {
+            repository.delete(oldToken);
+            throw new BusinessException(
+                    "Refresh token expired",
+                    "REFRESH_TOKEN_EXPIRED",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        // invalida SOLO este token
+        repository.delete(oldToken);
+
+        // crea nuevo
         return generateAndSaveToken(oldToken.getUser());
     }
+
 
     // =====================================================
     // CORE GENERATION

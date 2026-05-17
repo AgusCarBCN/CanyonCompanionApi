@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -41,14 +42,15 @@ public class SecurityConfig {
 
                 // 🔥 AUTORIZACIÓN
                 .authorizeHttpRequests(auth -> auth
-
                         // Public endpoints
                         .requestMatchers(
-                                "/api/auth/**",
+                                "/api/auth/login",
+                                "/api/auth/register",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
-
+                        .requestMatchers(HttpMethod.GET, "/api/maps/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/routes/**").permitAll()
                         // Any other request must be authenticated
                         .anyRequest().authenticated()
                 )

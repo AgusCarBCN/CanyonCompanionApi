@@ -11,7 +11,7 @@ public interface RefreshTokenService {
     RefreshTokenEntity findByToken(@Nullable String token);
 
     @Nullable
-    String createOrRefreshToken(@Nullable UserDetails userDetails);
+    String generateLoginToken(@Nullable UserDetails userDetails);
 
     @Nullable
     String rotateToken(@Nullable RefreshTokenEntity oldToken);

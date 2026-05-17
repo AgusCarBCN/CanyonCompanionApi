@@ -37,8 +37,8 @@ import java.util.Set;
 
 @Service
 @Transactional
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 public class UserAuthServiceImpl implements UserAuthService {
 
     private final UserRepository userRepository;
@@ -50,8 +50,9 @@ public class UserAuthServiceImpl implements UserAuthService {
     private final RefreshTokenService refreshTokenService;
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
+
     // =====================================================
-    // REGISTER USER
+    // REGISTER
     // =====================================================
     @Override
     public AuthResponse registerUser(UserRequestDTO request) {
@@ -65,37 +66,35 @@ public class UserAuthServiceImpl implements UserAuthService {
         }
 
         UserEntity user = userMapper.toUserEntity(request);
-
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        Set<RoleEntity> roles = buildRoles(false);
-        user.setRoles(roles);
+        user.setRoles(buildRoles(false));
 
         userRepository.save(user);
 
-        return authenticateAndGenerateTokens(request.getEmail(), request.getPassword());
+        return generateAuthSession(user);
     }
-
 
     // =====================================================
     // LOGIN
     // =====================================================
     @Override
-    public AuthResponse login(AuthRequestDTO loginRequest) {
-        // Find user by username or email
-        UserEntity user = userRepository.findByEmail(
-                loginRequest.getEmail()).orElseThrow( ()->new BusinessException(
-                ErrorCode.USER_NOT_FOUND.name(),
-                ErrorCode.USER_NOT_FOUND.getDefaultMessage(),
-                HttpStatus.NOT_FOUND));
+    public AuthResponse login(AuthRequestDTO request) {
 
-        // Verify password
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            throw new BusinessException(
-                    ErrorCode.INVALID_CREDENTIALS_PASSWORD.name(),
-                    ErrorCode.INVALID_CREDENTIALS_PASSWORD.getDefaultMessage(),
-                    HttpStatus.UNAUTHORIZED);
-        }
-        return authenticateAndGenerateTokens(loginRequest.getEmail(), loginRequest.getPassword());
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+
+        UserEntity user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.USER_NOT_FOUND.name(),
+                        ErrorCode.USER_NOT_FOUND.getDefaultMessage(),
+                        HttpStatus.NOT_FOUND
+                ));
+
+        return generateAuthSession(user);
     }
 
     // =====================================================
@@ -104,27 +103,47 @@ public class UserAuthServiceImpl implements UserAuthService {
     @Override
     public AuthResponse refreshToken(TokenRequestDTO request) {
 
-        var refreshToken = refreshTokenService.findByToken(request.getToken());
+        RefreshTokenEntity oldToken =
+                refreshTokenService.findByToken(request.getToken());
+
+        UserEntity user = oldToken.getUser();
+
+        String newRefreshToken = refreshTokenService.rotateToken(oldToken);
 
         UserDetails userDetails =
-                userDetailsService.loadUserByUsername(refreshToken.getUser().getEmail());
+                userDetailsService.loadUserByUsername(user.getEmail());
 
         String newAccessToken = jwtService.generateToken(userDetails);
-        String newRefreshToken = refreshTokenService.rotateToken(refreshToken);
-        //String newRefreshToken = refreshTokenService.createOrRefreshToken(userDetails);
 
-        return buildAuthResponse(userDetails, newAccessToken, newRefreshToken);
+        return AuthResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .username(userDetails.getUsername())
+                .roles(userDetails.getAuthorities()
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .toList())
+                .build();
     }
 
+    // =====================================================
+    // LOGOUT
+    // =====================================================
     @Override
-    public void logout(TokenRequestDTO request)
-    {
-        RefreshTokenEntity refreshToken = refreshTokenService.findByToken(request.getToken());
+    public void logout(TokenRequestDTO request) {
+
+        RefreshTokenEntity refreshToken =
+                refreshTokenService.findByToken(request.getToken());
+
         refreshTokenRepository.delete(refreshToken);
     }
 
+    // =====================================================
+    // ME
+    // =====================================================
     @Override
     public UserResponseDTO me(Authentication authentication) {
+
         String email = authentication.getName();
 
         UserEntity user = userRepository.findByEmail(email)
@@ -141,9 +160,6 @@ public class UserAuthServiceImpl implements UserAuthService {
                 .build();
     }
 
-    // =====================================================
-    // NOT IMPLEMENTED (PLACEHOLDERS)
-    // =====================================================
     @Override
     public boolean resendVerificationEmail(String email) {
         return false;
@@ -155,19 +171,17 @@ public class UserAuthServiceImpl implements UserAuthService {
     }
 
     // =====================================================
-    // CORE METHODS
+    // CORE SESSION CREATION (ÚNICO PUNTO DE TOKENS)
     // =====================================================
-    private AuthResponse authenticateAndGenerateTokens(String email, String password) {
-
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password)
-        );
+    private AuthResponse generateAuthSession(UserEntity user) {
 
         UserDetails userDetails =
-                userDetailsService.loadUserByUsername(email);
+                userDetailsService.loadUserByUsername(user.getEmail());
 
         String accessToken = jwtService.generateToken(userDetails);
-        String refreshToken = refreshTokenService.createOrRefreshToken(userDetails);
+
+        String refreshToken =
+                refreshTokenService.generateLoginToken(userDetails);
 
         return buildAuthResponse(userDetails, accessToken, refreshToken);
     }
@@ -183,11 +197,11 @@ public class UserAuthServiceImpl implements UserAuthService {
                 .username(userDetails.getUsername())
                 .roles(userDetails.getAuthorities()
                         .stream()
-                        .map(GrantedAuthority
-                                ::getAuthority)
+                        .map(GrantedAuthority::getAuthority)
                         .toList())
                 .build();
     }
+
     private Set<RoleEntity> buildRoles(boolean isAdmin) {
 
         Set<RoleEntity> roles = new HashSet<>();
@@ -205,5 +219,4 @@ public class UserAuthServiceImpl implements UserAuthService {
 
         return roles;
     }
-
 }

@@ -12,13 +12,9 @@ public enum Roles {
     @Schema(description = "Administrator role with full permissions")
     ROLE_ADMIN,
 
-    @Schema(description = "Manager role with limited administrative permissions")
-    ROLE_MANAGER,
 
     @Schema(description = "Regular user role with standard access")
-    ROLE_USER,
+    ROLE_USER
 
-    @Schema(description = "Guest role with minimal access")
-    ROLE_GUESS
 }
 
