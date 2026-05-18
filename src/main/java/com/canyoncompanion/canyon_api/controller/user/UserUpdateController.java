@@ -21,7 +21,6 @@ import java.io.IOException;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/user/update")
-@PreAuthorize("hasRole('USER')")
 public class UserUpdateController {
 
     private final UserUpdateService userUpdateService;

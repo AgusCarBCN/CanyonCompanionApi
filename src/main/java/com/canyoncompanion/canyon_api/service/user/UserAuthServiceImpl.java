@@ -34,6 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.springframework.data.util.ClassUtils.ifPresent;
+
 
 @Service
 @Transactional
@@ -130,12 +132,11 @@ public class UserAuthServiceImpl implements UserAuthService {
     // LOGOUT
     // =====================================================
     @Override
+    @Transactional
     public void logout(TokenRequestDTO request) {
 
-        RefreshTokenEntity refreshToken =
-                refreshTokenService.findByToken(request.getToken());
+        refreshTokenRepository.deleteByToken(request.getToken());
 
-        refreshTokenRepository.delete(refreshToken);
     }
 
     // =====================================================

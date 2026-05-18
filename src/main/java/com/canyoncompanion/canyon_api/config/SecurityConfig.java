@@ -47,10 +47,11 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/auth/register",
                                 "/swagger-ui/**",
-                                "/v3/api-docs/**"
+                                "/api/maps/**",
+                                "/v3/api-docs/**",
+                                "/api/routes/**",
+                                "/api/descents/**"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/maps/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/routes/**").permitAll()
                         // Any other request must be authenticated
                         .anyRequest().authenticated()
                 )

@@ -22,7 +22,6 @@ import java.util.Objects;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/user")
-@PreAuthorize("hasRole('USER')")
 public class UserAccountSettingController {
 
     private final UserAccountSettingService useAccountSetting;
@@ -67,6 +66,5 @@ public class UserAccountSettingController {
         useAccountSetting.activateAccount(email);
         return ResponseEntity.noContent().build();
     }
-
 
 }

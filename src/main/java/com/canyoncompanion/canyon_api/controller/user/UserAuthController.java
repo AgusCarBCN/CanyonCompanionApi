@@ -23,7 +23,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth") // centralizamos todos los endpoints de autenticación
 public class UserAuthController {
 
-    private final UserAuthService registrationService;
+    private final UserAuthService userAuthService;
+
 
     // ---------------------------
     // Register User
@@ -43,7 +44,7 @@ public class UserAuthController {
             @RequestBody @Valid UserRequestDTO userRequestDTO
     ) {
         // Crear usuario
-        var response=registrationService.registerUser(userRequestDTO);
+        var response=userAuthService.registerUser(userRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -64,7 +65,7 @@ public class UserAuthController {
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthRequestDTO request) {
 
         // 6️⃣ Devolver la respuesta HTTP 200 con los tokens y la info del usuario
-        var response=registrationService.login(request);
+        var response=userAuthService.login(request);
         return ResponseEntity.ok(response);
     }
 
@@ -86,7 +87,7 @@ public class UserAuthController {
 
     public ResponseEntity<AuthResponse> refreshToken(@RequestBody TokenRequestDTO request) {
 
-        var response=registrationService.refreshToken(request);
+        var response=userAuthService.refreshToken(request);
         return ResponseEntity.ok(response);
     }
     // ---------------------------
@@ -104,9 +105,10 @@ public class UserAuthController {
     })
     @PostMapping("/logout")
 
-    public ResponseEntity<Void> logout(@RequestBody TokenRequestDTO request) {
+    public ResponseEntity<Void> logout(@RequestBody TokenRequestDTO request
+                                       ) {
 
-        registrationService.logout(request);
+        userAuthService.logout(request);
         return ResponseEntity.ok().build();
     }
     // ---------------------------
@@ -125,7 +127,7 @@ public class UserAuthController {
 
     public ResponseEntity<UserResponseDTO> me(Authentication authentication) {
 
-        var response = registrationService.me(authentication);
+        var response = userAuthService.me(authentication);
         return ResponseEntity.ok(response);
     }
 }
