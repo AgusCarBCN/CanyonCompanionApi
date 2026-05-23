@@ -6,6 +6,11 @@ import com.canyoncompanion.canyon_api.dtos.requests.DescentRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.DescentResponseDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.PageResponse;
 import com.canyoncompanion.canyon_api.model.entities.DescentEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+
 public interface DescentService {
 
     // =====================================================
@@ -44,7 +49,7 @@ public interface DescentService {
     /**
      * Creates a new descent for the authenticated user.
      */
-    DescentResponseDTO createDescent(DescentRequestDTO dto);
+    // DescentResponseDTO createDescent(DescentRequestDTO dto);
 
     // =====================================================
     // UPDATE
@@ -84,4 +89,10 @@ public interface DescentService {
      * Only owner can modify.
      */
     DescentResponseDTO removeImage(Long descentId, Long imageId);
+
+
+    public void createDescent(
+            DescentRequestDTO dto,
+            List<MultipartFile> files
+    );
 }

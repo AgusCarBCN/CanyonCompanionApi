@@ -12,8 +12,13 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/user/descents")
@@ -65,13 +70,18 @@ public class UserDescentController {
             @ApiResponse(responseCode = "400", description = "Invalid request data"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @PostMapping
 
-    public ResponseEntity<DescentResponseDTO> createDescent(
-            @RequestBody @Valid DescentRequestDTO dto
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> createDescent(
+
+            @RequestPart("data") @Valid DescentRequestDTO requestDTO,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(descentService.createDescent(dto));
+
+        descentService.createDescent(requestDTO, files);
+
+        return ResponseEntity.ok().build();
     }
 
     // =====================================================

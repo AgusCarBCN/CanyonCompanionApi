@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Table(name = "descent_images")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Slf4j

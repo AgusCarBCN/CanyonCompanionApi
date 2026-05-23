@@ -16,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @Slf4j
 @Table(name = "descents")
 public class DescentEntity {

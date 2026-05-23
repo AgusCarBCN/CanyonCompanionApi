@@ -9,6 +9,7 @@ import com.canyoncompanion.canyon_api.exception.ErrorCode;
 import com.canyoncompanion.canyon_api.model.entities.DescentEntity;
 import com.canyoncompanion.canyon_api.model.entities.DescentImageEntity;
 import com.canyoncompanion.canyon_api.model.entities.UserEntity;
+import com.canyoncompanion.canyon_api.repository.DescentImageRepository;
 import com.canyoncompanion.canyon_api.repository.DescentRepository;
 import com.canyoncompanion.canyon_api.repository.UserRepository;
 import com.canyoncompanion.canyon_api.util.helpers.Sort;
@@ -18,20 +19,25 @@ import com.canyoncompanion.canyon_api.util.mappers.PageResponseMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class DescentServiceImpl implements DescentService {
 
-    private final DescentRepository repository;
+    private final DescentRepository descentRepository;
+    private final DescentImageRepository descentImageRepository;
+    private final StorageService storageService;
     private final DescentMapper descentMapper;
     private final DescentImageMapper descentImageMapper;
     private final UserRepository userRepository;
@@ -43,13 +49,13 @@ public class DescentServiceImpl implements DescentService {
 
         val sort =  Sort.getDescentSort(field,desc);
         Pageable pageable = PageRequest.of(page,size, sort);
-        val descentsPage = repository.findAll(pageable).map(descentMapper::toDTO);
+        val descentsPage = descentRepository.findAll(pageable).map(descentMapper::toDTO);
         return PageResponseMapper.mapToPageResponse(descentsPage);
     }
 
     @Override
     public DescentResponseDTO getDescentById(Long descentId) {
-        return repository.findById(descentId).map(descentMapper::toDTO).orElseThrow(() -> new BusinessException(
+        return descentRepository.findById(descentId).map(descentMapper::toDTO).orElseThrow(() -> new BusinessException(
                 "Descent not found with id: " + descentId,
                 ErrorCode.DESCENT_NOT_FOUND.getDefaultMessage(),
                 HttpStatus.NOT_FOUND
@@ -58,27 +64,18 @@ public class DescentServiceImpl implements DescentService {
 
     @Override
     public PageResponse<DescentResponseDTO> getMyDescents(String field, Boolean desc, Integer page, Integer size) {
-        val user =getCurrentUser();
+        val user =currentUserService.getCurrentUser();
         val sort =  Sort.getDescentSort(field,desc);
         Pageable pageable = PageRequest.of(page,size, sort);
-        val descentsPage = repository.findAllByUserId (user.getId(),pageable).map(descentMapper::toDTO);
+        val descentsPage = descentRepository.findAllByUserId (user.getId(),pageable).map(descentMapper::toDTO);
         return PageResponseMapper.mapToPageResponse(descentsPage);
     }
-    @Transactional
-    @Override
-    public DescentResponseDTO createDescent(DescentRequestDTO dto) {
-        val user = currentUserService.getCurrentUser();//getCurrentUser();
-        val descentEntity = descentMapper.toEntity(dto);
-        descentEntity.setUser(user);
-        descentEntity.setCreatedAt(LocalDateTime.now());
-        val savedDescent = repository.save(descentEntity);
-        return descentMapper.toDTO(savedDescent);
-    }
+
     @Transactional
     @Override
     public DescentResponseDTO updateDescent(Long descentId, DescentRequestDTO dto) {
-        val user = getCurrentUser();
-        val descentEntity = repository.findById(descentId).orElseThrow(() -> new BusinessException(
+        val user = currentUserService.getCurrentUser();
+        val descentEntity = descentRepository.findById(descentId).orElseThrow(() -> new BusinessException(
                 "Descent not found with id: " + descentId,
                 ErrorCode.DESCENT_NOT_FOUND.getDefaultMessage(),
                 HttpStatus.NOT_FOUND
@@ -91,15 +88,15 @@ public class DescentServiceImpl implements DescentService {
             );
         }
         descentMapper.updateEntityFromDto(dto, descentEntity);
-        val updatedDescent = repository.save(descentEntity);
+        val updatedDescent = descentRepository.save(descentEntity);
         return descentMapper.toDTO(updatedDescent);
     }
     @Transactional
     @Override
     public void deleteDescent(Long descentId) {
-        UserEntity user = getCurrentUser();
+        UserEntity user = currentUserService.getCurrentUser();
 
-        DescentEntity descent = repository.findById(descentId)
+        DescentEntity descent = descentRepository.findById(descentId)
                 .orElseThrow(() -> new BusinessException(
                         "Descent not found with id: " + descentId,
                         ErrorCode.DESCENT_NOT_FOUND.getDefaultMessage(),
@@ -114,14 +111,14 @@ public class DescentServiceImpl implements DescentService {
             );
         }
 
-        repository.delete(descent);
+        descentRepository.delete(descent);
     }
     @Transactional
     @Override
     public DescentResponseDTO addImage(Long descentId, String imageUrl) {
-        UserEntity user = getCurrentUser();
+        UserEntity user = currentUserService.getCurrentUser();
 
-        DescentEntity descent = repository.findById(descentId)
+        DescentEntity descent = descentRepository.findById(descentId)
                 .orElseThrow(() -> new BusinessException(
                         "Descent not found with id: " + descentId,
                         ErrorCode.DESCENT_NOT_FOUND.getDefaultMessage(),
@@ -145,9 +142,9 @@ public class DescentServiceImpl implements DescentService {
     @Transactional
     @Override
     public DescentResponseDTO removeImage(Long descentId, Long imageId) {
-        UserEntity user = getCurrentUser();
+        UserEntity user = currentUserService.getCurrentUser();
 
-        DescentEntity descent = repository.findById(descentId)
+        DescentEntity descent = descentRepository.findById(descentId)
                 .orElseThrow(() -> new BusinessException(
                         "Descent not found with id: " + descentId,
                         ErrorCode.DESCENT_NOT_FOUND.getDefaultMessage(),
@@ -176,19 +173,60 @@ public class DescentServiceImpl implements DescentService {
         return descentMapper.toDTO(descent);
 
     }
-    // =====================================================
-    // HELPER: CURRENT USER
-    // =====================================================
-    private UserEntity getCurrentUser() {
-        String email = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getName();
 
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(
-                        "Authenticated user not found",
-                        ErrorCode.USER_NOT_FOUND.getDefaultMessage(),
-                        HttpStatus.NOT_FOUND
-                ));
+    @Override
+    public void createDescent(DescentRequestDTO requestDTO, List<MultipartFile> files) {
+        // =====================================
+        // USER AUTH
+        // =====================================
+
+        UserEntity user = currentUserService.getCurrentUser();
+
+
+        // =====================================
+        // CREATE DESCENT
+        // =====================================
+
+        DescentEntity descent = DescentEntity.builder()
+                .name(requestDTO.getName())
+                .location(requestDTO.getLocation())
+                .province(requestDTO.getProvince())
+                .verticalCharacter(requestDTO.getVerticalCharacter())
+                .aquaticCharacter(requestDTO.getAquaticCharacter())
+                .commitment(requestDTO.getCommitment())
+                .descriptionLink(requestDTO.getDescriptionLink())
+                .comments(requestDTO.getComments())
+                .user(user)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        descentRepository.save(descent);
+
+        // =====================================
+        // IMAGES
+        // =====================================
+        if (files != null && !files.isEmpty()) {
+
+            List<DescentImageEntity> images = new ArrayList<>();
+
+            for (MultipartFile file : files) {
+
+                String imageUrl = storageService.saveDescentImage(file);
+
+                DescentImageEntity image = DescentImageEntity.builder()
+                        .imageUrl(imageUrl)
+                        .descent(descent)
+                        .createdAt(LocalDateTime.now())
+                        .updatedAt(LocalDateTime.now())
+                        .build();
+
+                images.add(image);
+            }
+
+            descentImageRepository.saveAll(images);
+        }
     }
-}
+ }
+
+

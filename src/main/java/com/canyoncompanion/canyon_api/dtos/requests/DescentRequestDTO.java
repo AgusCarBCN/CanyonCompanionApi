@@ -38,6 +38,4 @@ public class DescentRequestDTO {
 
     private String comments;
 
-    // 📸 IMÁGENES
-    private List<DescentImageRequestDTO> images;
 }
