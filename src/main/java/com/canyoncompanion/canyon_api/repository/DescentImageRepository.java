@@ -45,4 +45,5 @@ public interface DescentImageRepository
             Long id,
             Long descentId
     );
+
 }

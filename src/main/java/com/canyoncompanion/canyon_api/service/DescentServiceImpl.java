@@ -221,12 +221,11 @@ public class DescentServiceImpl implements DescentService {
                         .updatedAt(LocalDateTime.now())
                         .build();
 
-                images.add(image);
+                descentImageRepository.save(image);
             }
-
-            descentImageRepository.saveAll(images);
+            //descentImageRepository.saveAll(images);
         }
     }
- }
+}
 
 
