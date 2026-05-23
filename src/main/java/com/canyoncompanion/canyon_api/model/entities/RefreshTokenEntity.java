@@ -15,13 +15,7 @@ import java.time.Instant;
 @AllArgsConstructor
 public class RefreshTokenEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "refresh_seq")
-    @SequenceGenerator(
-            name = "refresh_seq",
-            sequenceName = "refresh_seq",
-            allocationSize = 1
-    )
-
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false, unique = true)
     private String token;

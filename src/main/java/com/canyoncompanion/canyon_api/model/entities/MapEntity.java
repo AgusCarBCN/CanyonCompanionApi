@@ -14,12 +14,7 @@ import lombok.*;
 public class MapEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "maps_seq")
-    @SequenceGenerator(
-            name = "maps_seq",
-            sequenceName = "maps_seq",
-            allocationSize = 1
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     // =========================

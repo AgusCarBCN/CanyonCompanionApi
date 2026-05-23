@@ -34,6 +34,8 @@ public interface RouteMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "descent", ignore = true)
     @Mapping(target = "waypoints", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "date", ignore = true)
     RouteEntity toEntity(RouteRequestDTO dto);
 
     @Mapping(target = "id", ignore = true)

@@ -25,12 +25,7 @@ import java.util.Set;
 public class UserEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
-    @SequenceGenerator(
-            name = "user_seq",
-            sequenceName = "users_seq",
-            allocationSize = 1
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, length = 50)
@@ -45,12 +40,13 @@ public class UserEntity {
     @Column(nullable = false, length = 255)
     private String password;
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private UserStatus status = UserStatus.ACTIVE;
 
     private String statusDescription;
-
+    @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
-
+    @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     // ---------------------------

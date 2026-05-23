@@ -16,15 +16,9 @@ import java.time.LocalDateTime;
 @Slf4j
 public class DescentImageEntity {
 
-    @Id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "descent_images_seq")
-    @SequenceGenerator(
-            name = "descent_images_seq",
-            sequenceName = "descent_images_seq",
-            allocationSize = 1
-    )
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     // =========================

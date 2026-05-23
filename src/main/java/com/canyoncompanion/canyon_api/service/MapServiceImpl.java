@@ -36,8 +36,5 @@ public class MapServiceImpl implements MapService {
                 .imagePath(map.getImagePath())
                 .build();
     }
-    @PostConstruct
-    public void debug() {
-        System.out.println("MAPS SIZE: " + mapRepository.findAll().size());
-    }
+
 }

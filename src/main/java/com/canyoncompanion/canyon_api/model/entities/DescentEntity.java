@@ -21,14 +21,9 @@ import java.util.List;
 public class DescentEntity {
 
    //@GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "descent_seq")
-    @SequenceGenerator(
-            name = "descent_seq",
-            sequenceName = "descents_seq",
-            allocationSize = 1
-    )
-    private Long id;
+   @Id
+   @GeneratedValue(strategy = GenerationType.IDENTITY)
+   private Long id;
 
     // =========================
     // RELATIONSHIP
