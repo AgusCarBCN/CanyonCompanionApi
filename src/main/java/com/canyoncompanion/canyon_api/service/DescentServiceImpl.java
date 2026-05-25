@@ -130,10 +130,10 @@ public class DescentServiceImpl implements DescentService {
         // 3. BORRAR ARCHIVOS (FILESYSTEM)
         // =====================================
 
-        storageService.deleteFiles(imageUrls);
-        /*for (String url : imageUrls) {
+        //storageService.deleteFiles(imageUrls);
+        for (String url : imageUrls) {
                 storageService.deleteDescentImage(url);
-        }*/
+        }
     }
     @Transactional
     @Override

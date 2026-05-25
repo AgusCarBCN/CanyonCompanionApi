@@ -84,18 +84,20 @@ public class StorageServiceImpl implements StorageService {
 
         try {
 
-            Path path = Paths.get(imageUrl);
+            // si imageUrl es "/descents/images/abc.jpg"
+            String filename = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+
+            Path path = Paths.get(UPLOAD_DIR).resolve(filename);
 
             Files.deleteIfExists(path);
 
         } catch (IOException e) {
 
-            throw new  BusinessException(
-                    "You are not authorized to delete this descent",
+            throw new BusinessException(
+                    "Error deleting image file",
                     ErrorCode.IMAGE_NOT_DELETED.getDefaultMessage(),
                     HttpStatus.INTERNAL_SERVER_ERROR
             );
-
         }
     }
     @Override
