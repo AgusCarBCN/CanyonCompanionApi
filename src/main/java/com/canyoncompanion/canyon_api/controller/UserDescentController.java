@@ -73,7 +73,7 @@ public class UserDescentController {
 
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> createDescent(
+    public ResponseEntity<Void> createDescent(
 
             @RequestPart("data") @Valid DescentRequestDTO requestDTO,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
@@ -119,6 +119,9 @@ public class UserDescentController {
             @ApiResponse(responseCode = "201", description = "Descent removed successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
+
+
+
     @DeleteMapping("/{id}")
 
     public ResponseEntity<Void> deleteDescent(

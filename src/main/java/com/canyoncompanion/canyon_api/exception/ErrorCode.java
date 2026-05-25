@@ -20,6 +20,11 @@ public enum ErrorCode {
     INVALID_FIELD("Invalid field"),
     INVALID_REFRESH_TOKEN("Invalid refresh token"),
     NO_OWNER_DESCENT("Only the owner of the descent can perform this action"),
+    IMAGE_NOT_UPLOADED("Image is not uploaded"),
+    FILE_NOT_FOUND("File not found"),
+    IMAGE_ALREADY_EXISTS("Image already exists"),
+    IMAGE_NOT_DOWNLOADED("Image is not downloaded"),
+    IMAGE_NOT_DELETED("Failed to delete image"),
     FORBIDDEN("You do not have permission to perform this action");
     private final String defaultMessage;
 

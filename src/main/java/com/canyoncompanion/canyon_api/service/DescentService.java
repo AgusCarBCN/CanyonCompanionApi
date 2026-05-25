@@ -91,8 +91,9 @@ public interface DescentService {
     DescentResponseDTO removeImage(Long descentId, Long imageId);
 
 
-    public void createDescent(
+    void createDescent(
             DescentRequestDTO dto,
             List<MultipartFile> files
     );
+
 }

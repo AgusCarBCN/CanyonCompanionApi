@@ -55,7 +55,7 @@ public class DescentServiceImpl implements DescentService {
 
     @Override
     public DescentResponseDTO getDescentById(Long descentId) {
-        return descentRepository.findById(descentId).map(descentMapper::toDTO).orElseThrow(() -> new BusinessException(
+        return descentRepository.findByIdWithImages(descentId).map(descentMapper::toDTO).orElseThrow(() -> new BusinessException(
                 "Descent not found with id: " + descentId,
                 ErrorCode.DESCENT_NOT_FOUND.getDefaultMessage(),
                 HttpStatus.NOT_FOUND
@@ -110,8 +110,30 @@ public class DescentServiceImpl implements DescentService {
                     HttpStatus.FORBIDDEN
             );
         }
+        // =====================================
+        // 1. GUARDAR URLs ANTES DE BORRAR BD
+        // =====================================
+        List<String> imageUrls = new ArrayList<>();
 
+        if (descent.getImages() != null && !descent.getImages().isEmpty()) {
+            imageUrls = descent.getImages()
+                    .stream()
+                    .map(DescentImageEntity::getImageUrl)
+                    .toList();
+        }
+        // =====================================
+        // 2. BORRAR ENTIDAD (BD)
+        // =====================================
         descentRepository.delete(descent);
+
+        // =====================================
+        // 3. BORRAR ARCHIVOS (FILESYSTEM)
+        // =====================================
+
+        storageService.deleteFiles(imageUrls);
+        /*for (String url : imageUrls) {
+                storageService.deleteDescentImage(url);
+        }*/
     }
     @Transactional
     @Override
