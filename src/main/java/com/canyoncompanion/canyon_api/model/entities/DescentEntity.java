@@ -40,6 +40,7 @@ public class DescentEntity {
             fetch = FetchType.LAZY
     )
     @ToString.Exclude
+    @Builder.Default
     @EqualsAndHashCode.Exclude
     private List<DescentImageEntity> images = new ArrayList<>();
     // =========================
@@ -82,10 +83,10 @@ public class DescentEntity {
     // AUDIT
     // =========================
     @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    private LocalDateTime updatedAt;
 
     public void addImage(DescentImageEntity image) {
         images.add(image);

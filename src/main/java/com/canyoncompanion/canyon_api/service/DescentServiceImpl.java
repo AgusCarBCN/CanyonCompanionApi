@@ -243,9 +243,10 @@ public class DescentServiceImpl implements DescentService {
                         .updatedAt(LocalDateTime.now())
                         .build();
 
-                descentImageRepository.save(image);
+                images.add(image);
             }
-            //descentImageRepository.saveAll(images);
+
+            descentImageRepository.saveAll(images);
         }
     }
 }
