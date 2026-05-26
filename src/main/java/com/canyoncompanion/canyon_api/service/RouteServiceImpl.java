@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.RouteMatcher;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,33 +83,50 @@ public class RouteServiceImpl implements RouteService {
 
     }*/
 
+    @Transactional
     @Override
-    public RouteResponseDTO createRoute(RouteRequestDTO dto, MultipartFile gpxFile, MultipartFile[] waypointImages) {
-        // 👤 usuario autenticado
-        val user = currentUserService.getCurrentUser();
+    public RouteEntity createRoute(
+            RouteRequestDTO dto,
+            MultipartFile gpxFile,
+            MultipartFile[] waypointImages
+    ) {
+
+        UserEntity user = currentUserService.getCurrentUser();
 
         // =====================================
-        // 1. SAVE ROUTE
+        // 1. VALIDATE + UPLOAD GPX FIRST
         // =====================================
-
-        // 🗺️ map DTO → entity
-        val routeEntity = routeMapper.toEntity(dto);
-        // 🔗 asignar usuario (OBLIGATORIO)
-        routeEntity.setUser(user);
-        routeRepository.save(routeEntity);
-
-        // =====================================
-        // 2. SAVE GPX FILE
-        // =====================================
-        if (gpxFile != null && !gpxFile.isEmpty()) {
-
-            String gpxUrl = storageService.saveGpxFile(gpxFile);
-
-            routeEntity.setResourcePath(gpxUrl);
+        if (gpxFile == null || gpxFile.isEmpty()) {
+            throw new BusinessException(
+                    "GPX file is required",
+                    ErrorCode.INVALID_FILE_TYPE.getDefaultMessage(),
+                    HttpStatus.BAD_REQUEST
+            );
         }
 
+        String gpxUrl = storageService.saveGpxFile(gpxFile);
+
         // =====================================
-        // 3. WAYPOINTS + IMAGES
+        // 2. CREATE ROUTE ENTITY (WITH GPX READY)
+        // =====================================
+        RouteEntity route = new RouteEntity();
+        route.setName(dto.getName());
+        route.setDescription(dto.getDescription());
+        route.setUser(user);
+        route.setDate(LocalDateTime.now());
+        route.setResourcePath(gpxUrl);
+
+        if (dto.getDescentId() != null) {
+            DescentEntity descent = descentRepository.findById(dto.getDescentId())
+                    .orElseThrow();
+            route.setDescent(descent);
+        }
+
+        // persist route first (needed for FK in waypoints)
+        route = routeRepository.save(route);
+
+        // =====================================
+        // 3. BUILD WAYPOINTS + IMAGES
         // =====================================
         List<WaypointEntity> waypoints = new ArrayList<>();
 
@@ -116,44 +134,44 @@ public class RouteServiceImpl implements RouteService {
 
             for (int i = 0; i < dto.getWaypoints().size(); i++) {
 
-                WaypointRequestDTO wp = dto.getWaypoints().get(i);
+                WaypointRequestDTO wpDto = dto.getWaypoints().get(i);
 
-                WaypointEntity entity = new WaypointEntity();
-                entity.setName(wp.getName());
-                entity.setDescription(wp.getDescription());
-                entity.setLatitude(wp.getLatitude());
-                entity.setLongitude(wp.getLongitude());
-                entity.setElevation(wp.getElevation());
-                entity.setIcon(wp.getIcon());
-                entity.setTime(wp.getTime());
-                entity.setRoute(routeEntity);
+                WaypointEntity wp = new WaypointEntity();
+                wp.setName(wpDto.getName());
+                wp.setDescription(wpDto.getDescription());
+                wp.setLatitude(wpDto.getLatitude());
+                wp.setLongitude(wpDto.getLongitude());
+                wp.setElevation(wpDto.getElevation());
+                wp.setIcon(wpDto.getIcon());
+                wp.setTime(wpDto.getTime());
+                wp.setRoute(route);
 
                 // =====================================
-                // 3.1 WAYPOINT IMAGE (BY INDEX)
+                // 3.1 IMAGE UPLOAD (BY INDEX MATCH)
                 // =====================================
-                if (waypointImages != null &&
-                        i < waypointImages.length &&
-                        waypointImages[i] != null &&
-                        !waypointImages[i].isEmpty()) {
+                if (waypointImages != null
+                        && i < waypointImages.length
+                        && waypointImages[i] != null
+                        && !waypointImages[i].isEmpty()) {
 
                     String imageUrl = storageService.saveImage(
                             waypointImages[i],
                             StorageType.WAYPOINT_IMAGE
                     );
 
-                    entity.setImagePath(imageUrl);
+                    wp.setImagePath(imageUrl);
                 }
 
-                waypoints.add(entity);
+                waypoints.add(wp);
             }
         }
 
-        // cascade persist
-        routeEntity.setWaypoints(waypoints);
+        // =====================================
+        // 4. ATTACH WAYPOINTS (CASCADE SAVE)
+        // =====================================
+        route.setWaypoints(waypoints);
 
-        val routeSaved= routeRepository.save(routeEntity);
-
-        return routeMapper.toResponse(routeSaved);
+        return routeRepository.save(route);
     }
 
     @Override
