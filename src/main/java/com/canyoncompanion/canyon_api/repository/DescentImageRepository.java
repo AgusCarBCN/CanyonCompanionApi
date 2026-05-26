@@ -3,7 +3,10 @@
 package com.canyoncompanion.canyon_api.repository;
 
 import com.canyoncompanion.canyon_api.model.entities.DescentImageEntity;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,5 +48,11 @@ public interface DescentImageRepository
             Long id,
             Long descentId
     );
-
+    @Transactional
+    @Modifying
+    @Query("""
+    DELETE FROM DescentImageEntity di
+    WHERE di.descent.id = :descentId
+""")
+    void deleteByDescentId(Long descentId);
 }

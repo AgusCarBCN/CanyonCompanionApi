@@ -96,7 +96,18 @@ public class UserDescentController {
             @ApiResponse(responseCode = "400", description = "Invalid request data"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> updateDescent(
+            @PathVariable Long id,
+            @RequestPart("data") DescentRequestDTO dto,
+            @RequestPart(value = "files", required = false) MultipartFile[] files
+    ) {
+
+        descentService.updateDescent(id, dto, files);
+
+        return ResponseEntity.ok().build();
+    }
+   /*@PutMapping("/{id}")
 
     public ResponseEntity<DescentResponseDTO> updateDescent(
             @PathVariable Long id,
@@ -105,7 +116,7 @@ public class UserDescentController {
         return ResponseEntity.ok(
                 descentService.updateDescent(id, dto)
         );
-    }
+    }*/
 
     // =====================================================
     // DELETE DESCENT

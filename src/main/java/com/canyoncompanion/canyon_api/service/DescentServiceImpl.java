@@ -93,6 +93,55 @@ public class DescentServiceImpl implements DescentService {
     }
     @Transactional
     @Override
+    public void updateDescent(Long id, DescentRequestDTO dto, MultipartFile[] files) {
+        val user = currentUserService.getCurrentUser();
+        val descentEntity = descentRepository.findById(id).orElseThrow(() -> new BusinessException(
+                "Descent not found with id: " + id,
+                ErrorCode.DESCENT_NOT_FOUND.getDefaultMessage(),
+                HttpStatus.NOT_FOUND
+        ));
+        if (!descentEntity.getUser().getId().equals(user.getId())) {
+            throw new BusinessException(
+                    "You are not authorized to update this descent",
+                    ErrorCode.NO_OWNER_DESCENT.name(),
+                    HttpStatus.FORBIDDEN
+            );
+        }
+        descentMapper.updateEntityFromDto(dto, descentEntity);
+        descentRepository.save(descentEntity);
+
+
+        // 2. borrar imágenes antiguas
+        if (descentEntity.getImages() != null) {
+            for (DescentImageEntity img : descentEntity.getImages()) {
+                storageService.deleteDescentImage(img.getImageUrl());
+            }
+            // delete old records from DB
+            descentImageRepository.deleteByDescentId(descentEntity.getId());
+        }
+
+        // 3. subir nuevas imágenes
+        if (files != null && files.length > 0) {
+
+            for (MultipartFile file : files) {
+
+                String url = storageService.saveDescentImage(file);
+
+                DescentImageEntity image = DescentImageEntity.builder()
+                        .imageUrl(url)
+                        .descent(descentEntity)
+                        .createdAt(LocalDateTime.now())
+                        .updatedAt(LocalDateTime.now())
+                        .build();
+
+                descentImageRepository.save(image);
+            }
+        }
+    }
+
+
+    @Transactional
+    @Override
     public void deleteDescent(Long descentId) {
         UserEntity user = currentUserService.getCurrentUser();
 

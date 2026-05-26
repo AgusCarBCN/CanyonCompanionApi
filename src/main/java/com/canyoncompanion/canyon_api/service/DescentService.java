@@ -54,7 +54,7 @@ public interface DescentService {
     // =====================================================
     // UPDATE
     // =====================================================
-
+    public void updateDescent(Long id, DescentRequestDTO dto, MultipartFile[] files);
     /**
      * Updates a descent.
      * Only allowed if the authenticated user is the owner.
