@@ -20,6 +20,7 @@ public enum ErrorCode {
     INVALID_FIELD("Invalid field"),
     INVALID_REFRESH_TOKEN("Invalid refresh token"),
     NO_OWNER_DESCENT("Only the owner of the descent can perform this action"),
+    NO_OWNER_ROUTE("Only the owner of the route can be performed"),
     IMAGE_NOT_UPLOADED("Image is not uploaded"),
     FILE_NOT_FOUND("File not found"),
     IMAGE_ALREADY_EXISTS("Image already exists"),

@@ -27,6 +27,5 @@ public class WaypointRequestDTO {
 
     private Double elevation;
     private Integer icon;
-    private String imagePath;
     private LocalDateTime time;
 }

@@ -4,6 +4,7 @@ package com.canyoncompanion.canyon_api.controller;
 import com.canyoncompanion.canyon_api.dtos.requests.RouteRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.PageResponse;
 import com.canyoncompanion.canyon_api.dtos.responses.RouteResponseDTO;
+import com.canyoncompanion.canyon_api.model.entities.RouteEntity;
 import com.canyoncompanion.canyon_api.service.RouteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/user/routes")
@@ -39,12 +41,22 @@ public class UserRouteController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     public ResponseEntity<RouteResponseDTO> createRoute(
+            @RequestPart("data") RouteRequestDTO dto,
+            @RequestPart(value = "gpxFile", required = false) MultipartFile gpxFile,
+            @RequestPart(value = "waypointImages", required = false) MultipartFile[] waypointImages
+    ) {
+
+        RouteResponseDTO route = routeService.createRoute(dto, gpxFile, waypointImages);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(route);
+    }
+    /*public ResponseEntity<RouteResponseDTO> createRoute(
             @RequestBody @Valid RouteRequestDTO dto
 
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(routeService.createRoute(dto));
-    }
+    }*/
 
     // =====================================================
     // GET MY ROUTES

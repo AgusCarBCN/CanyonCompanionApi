@@ -23,12 +23,9 @@ public class RouteRequestDTO {
     @NotBlank(message = "name is required")
     private String name;
 
-    @NotBlank(message = "resourcePath is required")
-    private String resourcePath;
-
     private String description;
 
-    // 📊 métricas calculadas en el cliente (tracking en vivo)
+    // métricas calculadas en cliente
     private Long time;
     private Double distance;
     private Float totalAscent;

@@ -1,15 +1,13 @@
 package com.canyoncompanion.canyon_api.service;
 
 import com.canyoncompanion.canyon_api.dtos.requests.RouteRequestDTO;
+import com.canyoncompanion.canyon_api.dtos.requests.WaypointRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.PageResponse;
 import com.canyoncompanion.canyon_api.dtos.responses.RouteResponseDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.WaypointResponseDTO;
 import com.canyoncompanion.canyon_api.exception.BusinessException;
 import com.canyoncompanion.canyon_api.exception.ErrorCode;
-import com.canyoncompanion.canyon_api.model.entities.DescentEntity;
-import com.canyoncompanion.canyon_api.model.entities.RouteEntity;
-import com.canyoncompanion.canyon_api.model.entities.UserEntity;
-import com.canyoncompanion.canyon_api.model.entities.WaypointEntity;
+import com.canyoncompanion.canyon_api.model.entities.*;
 import com.canyoncompanion.canyon_api.repository.DescentRepository;
 import com.canyoncompanion.canyon_api.repository.RouteRepository;
 import com.canyoncompanion.canyon_api.repository.WaypointRepository;
@@ -25,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.RouteMatcher;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,9 +36,10 @@ public class RouteServiceImpl implements RouteService {
     private final WaypointRepository waypointRepository;
     private final DescentRepository descentRepository;
     private final CurrentUserService currentUserService;
+    private final StorageService storageService;
     private final RouteMapper routeMapper;
 
-    @Transactional
+   /* @Transactional
     @Override
     public RouteResponseDTO createRoute(RouteRequestDTO dto) {
         // 👤 usuario autenticado
@@ -80,6 +80,80 @@ public class RouteServiceImpl implements RouteService {
         // 📤 response
         return routeMapper.toResponse(saved);
 
+    }*/
+
+    @Override
+    public RouteResponseDTO createRoute(RouteRequestDTO dto, MultipartFile gpxFile, MultipartFile[] waypointImages) {
+        // 👤 usuario autenticado
+        val user = currentUserService.getCurrentUser();
+
+        // =====================================
+        // 1. SAVE ROUTE
+        // =====================================
+
+        // 🗺️ map DTO → entity
+        val routeEntity = routeMapper.toEntity(dto);
+        // 🔗 asignar usuario (OBLIGATORIO)
+        routeEntity.setUser(user);
+        routeRepository.save(routeEntity);
+
+        // =====================================
+        // 2. SAVE GPX FILE
+        // =====================================
+        if (gpxFile != null && !gpxFile.isEmpty()) {
+
+            String gpxUrl = storageService.saveGpxFile(gpxFile);
+
+            routeEntity.setResourcePath(gpxUrl);
+        }
+
+        // =====================================
+        // 3. WAYPOINTS + IMAGES
+        // =====================================
+        List<WaypointEntity> waypoints = new ArrayList<>();
+
+        if (dto.getWaypoints() != null) {
+
+            for (int i = 0; i < dto.getWaypoints().size(); i++) {
+
+                WaypointRequestDTO wp = dto.getWaypoints().get(i);
+
+                WaypointEntity entity = new WaypointEntity();
+                entity.setName(wp.getName());
+                entity.setDescription(wp.getDescription());
+                entity.setLatitude(wp.getLatitude());
+                entity.setLongitude(wp.getLongitude());
+                entity.setElevation(wp.getElevation());
+                entity.setIcon(wp.getIcon());
+                entity.setTime(wp.getTime());
+                entity.setRoute(routeEntity);
+
+                // =====================================
+                // 3.1 WAYPOINT IMAGE (BY INDEX)
+                // =====================================
+                if (waypointImages != null &&
+                        i < waypointImages.length &&
+                        waypointImages[i] != null &&
+                        !waypointImages[i].isEmpty()) {
+
+                    String imageUrl = storageService.saveImage(
+                            waypointImages[i],
+                            StorageType.WAYPOINT_IMAGE
+                    );
+
+                    entity.setImagePath(imageUrl);
+                }
+
+                waypoints.add(entity);
+            }
+        }
+
+        // cascade persist
+        routeEntity.setWaypoints(waypoints);
+
+        val routeSaved= routeRepository.save(routeEntity);
+
+        return routeMapper.toResponse(routeSaved);
     }
 
     @Override
@@ -116,6 +190,59 @@ public class RouteServiceImpl implements RouteService {
     @Override
     public void deleteRoute(Long id) {
         UserEntity user = currentUserService.getCurrentUser();
+
+        // =====================================
+        // 1. LOAD ROUTE WITH WAYPOINTS
+        // =====================================
+        RouteEntity route = routeRepository.findByIdWithWaypoints(id)
+                .orElseThrow(() -> new BusinessException(
+                        "Route not found",
+                        ErrorCode.ROUTE_NOT_FOUND.getDefaultMessage(),
+                        HttpStatus.NOT_FOUND
+                ));
+
+        // =====================================
+        // 2. CHECK OWNER
+        // =====================================
+        if (!route.getUser().getId().equals(user.getId())) {
+            throw new BusinessException(
+                    "Forbidden",
+                    ErrorCode.NO_OWNER_ROUTE .name(),
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
+        // =====================================
+        // 3. DELETE GPX FILE
+        // =====================================
+        if (route.getResourcePath() != null) {
+            storageService.deleteFile(
+                    route.getResourcePath(),
+                    StorageType.GPX_FILE
+            );
+        }
+
+        // =====================================
+        // 4. DELETE WAYPOINT IMAGES
+        // =====================================
+        if (route.getWaypoints() != null) {
+            for (WaypointEntity wp : route.getWaypoints()) {
+
+                if (wp.getImagePath() != null) {
+                    storageService.deleteFile(
+                            wp.getImagePath(),
+                            StorageType.WAYPOINT_IMAGE
+                    );
+                }
+            }
+        }
+
+        // =====================================
+        // 5. DELETE ROUTE (CASCADE WAYPOINTS)
+        // =====================================
+        routeRepository.delete(route);
+
+      /*  UserEntity user = currentUserService.getCurrentUser();
         RouteEntity route = routeRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(
                         "Route not found",
@@ -132,7 +259,7 @@ public class RouteServiceImpl implements RouteService {
             );
         }
 
-        routeRepository.delete(route);
+        routeRepository.delete(route);*/
     }
 
     @Override

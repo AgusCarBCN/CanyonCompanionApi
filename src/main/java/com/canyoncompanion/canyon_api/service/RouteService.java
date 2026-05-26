@@ -4,6 +4,7 @@ import com.canyoncompanion.canyon_api.dtos.requests.RouteFilterRequest;
 import com.canyoncompanion.canyon_api.dtos.requests.RouteRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.PageResponse;
 import com.canyoncompanion.canyon_api.dtos.responses.RouteResponseDTO;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -12,8 +13,12 @@ public interface RouteService {
     // =====================================================
     // CREATE
     // =====================================================
-    RouteResponseDTO createRoute(RouteRequestDTO dto);
-
+    //RouteResponseDTO createRoute(RouteRequestDTO dto);
+    RouteResponseDTO createRoute(
+            RouteRequestDTO dto,
+            MultipartFile gpxFile,
+            MultipartFile[] waypointImages
+    );
     // =====================================================
     // UPDATE
     // =====================================================
