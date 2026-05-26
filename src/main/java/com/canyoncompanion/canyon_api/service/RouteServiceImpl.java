@@ -85,7 +85,7 @@ public class RouteServiceImpl implements RouteService {
 
     @Transactional
     @Override
-    public RouteEntity createRoute(
+    public RouteResponseDTO createRoute(
             RouteRequestDTO dto,
             MultipartFile gpxFile,
             MultipartFile[] waypointImages
@@ -171,7 +171,8 @@ public class RouteServiceImpl implements RouteService {
         // =====================================
         route.setWaypoints(waypoints);
 
-        return routeRepository.save(route);
+        val routeSaved= routeRepository.save(route);
+        return routeMapper.toResponse(routeSaved);
     }
 
     @Override

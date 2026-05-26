@@ -36,9 +36,11 @@ public interface RouteMapper {
     @Mapping(target = "waypoints", ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "date", ignore = true)
+    @Mapping(target = "resourcePath", ignore = true)
     RouteEntity toEntity(RouteRequestDTO dto);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "route", ignore = true)
+    @Mapping(target = "imagePath", ignore = true)
     WaypointEntity toWaypointEntity(WaypointRequestDTO dto);
 }
