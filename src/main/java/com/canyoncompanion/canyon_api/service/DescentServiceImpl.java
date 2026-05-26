@@ -22,8 +22,6 @@ import lombok.val;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -114,7 +112,7 @@ public class DescentServiceImpl implements DescentService {
         // 2. borrar imágenes antiguas
         if (descentEntity.getImages() != null) {
             for (DescentImageEntity img : descentEntity.getImages()) {
-                storageService.deleteDescentImage(img.getImageUrl());
+                storageService.deleteFile(img.getImageUrl(),StorageType.DESCENT_IMAGE);
             }
             // delete old records from DB
             descentImageRepository.deleteByDescentId(descentEntity.getId());
@@ -125,7 +123,7 @@ public class DescentServiceImpl implements DescentService {
 
             for (MultipartFile file : files) {
 
-                String url = storageService.saveDescentImage(file);
+                String url = storageService.saveImage(file,StorageType.DESCENT_IMAGE);
 
                 DescentImageEntity image = DescentImageEntity.builder()
                         .imageUrl(url)
@@ -181,7 +179,7 @@ public class DescentServiceImpl implements DescentService {
 
         //storageService.deleteFiles(imageUrls);
         for (String url : imageUrls) {
-                storageService.deleteDescentImage(url);
+                storageService.deleteFile(url,StorageType.DESCENT_IMAGE);
         }
     }
     @Transactional
@@ -283,7 +281,7 @@ public class DescentServiceImpl implements DescentService {
 
             for (MultipartFile file : files) {
 
-                String imageUrl = storageService.saveDescentImage(file);
+                String imageUrl = storageService.saveImage(file,StorageType.DESCENT_IMAGE);
 
                 DescentImageEntity image = DescentImageEntity.builder()
                         .imageUrl(imageUrl)

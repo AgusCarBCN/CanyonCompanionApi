@@ -25,7 +25,12 @@ public enum ErrorCode {
     IMAGE_ALREADY_EXISTS("Image already exists"),
     IMAGE_NOT_DOWNLOADED("Image is not downloaded"),
     IMAGE_NOT_DELETED("Failed to delete image"),
-    FORBIDDEN("You do not have permission to perform this action");
+    FORBIDDEN("You do not have permission to perform this action"),
+    FILE_IS_EMPTY("File is empty"),
+    FAILED_GPX_UPLOAD("Failed to upload GPX"),
+    INVALID_IMAGE_TYPE("Invalid image type"),
+    INVALID_FILE_TYPE("Invalid file type"),
+    INVALID_EXTENSION("Invalid file extension");
     private final String defaultMessage;
 
     ErrorCode(String defaultMessage) {

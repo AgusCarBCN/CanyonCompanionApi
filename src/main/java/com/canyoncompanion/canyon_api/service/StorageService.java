@@ -7,10 +7,11 @@ import java.util.List;
 
 public interface StorageService {
 
-    String saveDescentImage(MultipartFile file);
+    String saveImage(MultipartFile file, StorageType storageType);
 
-    void deleteDescentImage(String imageUrl);
+    void deleteFile(String fileUrl, StorageType storageType);
 
     void deleteFiles(List<String> urls);
 
+    String saveGpxFile(MultipartFile file);;
 }
