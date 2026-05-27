@@ -2,6 +2,7 @@ package com.canyoncompanion.canyon_api.service;
 
 
 import com.canyoncompanion.canyon_api.dtos.requests.DescentRequestDTO;
+import com.canyoncompanion.canyon_api.dtos.responses.DescentPreviewDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.DescentResponseDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.PageResponse;
 import com.canyoncompanion.canyon_api.exception.BusinessException;
@@ -43,11 +44,20 @@ public class DescentServiceImpl implements DescentService {
 
 
     @Override
-    public PageResponse <DescentResponseDTO> getAllDescents(String field, Boolean desc,Integer page, Integer size) {
+    public PageResponse <DescentPreviewDTO> getAllDescents(String field, Boolean desc, Integer page, Integer size) {
 
         val sort =  Sort.getDescentSort(field,desc);
         Pageable pageable = PageRequest.of(page,size, sort);
-        val descentsPage = descentRepository.findAll(pageable).map(descentMapper::toDTO);
+        val descentsPage = descentRepository.findAll(pageable).map(descentMapper::toPreviewDTO).map(dto -> {
+            if (dto.getThumbnailUrl() == null) {
+                DescentEntity entity = descentRepository.findById(dto.getId()).orElse(null);
+                if (entity != null) {
+                    String thumbnailUrl = buildThumbnail(entity.getImages());
+                    dto.setThumbnailUrl(thumbnailUrl);
+                }
+            }
+            return dto;
+        });
         return PageResponseMapper.mapToPageResponse(descentsPage);
     }
 
@@ -295,6 +305,14 @@ public class DescentServiceImpl implements DescentService {
 
             descentImageRepository.saveAll(images);
         }
+    }
+    private String buildThumbnail(List<DescentImageEntity> images) {
+
+        if (images == null || images.isEmpty()) {
+            return null;
+        }
+
+        return images.get(0).getImageUrl();
     }
 }
 

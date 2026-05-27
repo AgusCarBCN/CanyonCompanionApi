@@ -3,6 +3,7 @@ package com.canyoncompanion.canyon_api.service;
 
 
 import com.canyoncompanion.canyon_api.dtos.requests.DescentRequestDTO;
+import com.canyoncompanion.canyon_api.dtos.responses.DescentPreviewDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.DescentResponseDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.PageResponse;
 import com.canyoncompanion.canyon_api.model.entities.DescentEntity;
@@ -20,7 +21,7 @@ public interface DescentService {
     /**
      * Retrieves all descents (public feed) with pagination and sorting.
      */
-    PageResponse<DescentResponseDTO> getAllDescents(
+    PageResponse<DescentPreviewDTO> getAllDescents(
             String field,
             Boolean desc,
             Integer page,

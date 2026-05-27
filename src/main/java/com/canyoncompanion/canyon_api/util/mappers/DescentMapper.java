@@ -1,6 +1,7 @@
 package com.canyoncompanion.canyon_api.util.mappers;
 
 import com.canyoncompanion.canyon_api.dtos.responses.DescentImageResponseDTO;
+import com.canyoncompanion.canyon_api.dtos.responses.DescentPreviewDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.DescentResponseDTO;
 import com.canyoncompanion.canyon_api.dtos.requests.DescentRequestDTO;
 import com.canyoncompanion.canyon_api.model.entities.DescentEntity;
@@ -41,4 +42,9 @@ public interface DescentMapper {
             DescentRequestDTO dto,
             @MappingTarget DescentEntity entity
     );
+
+    @Mapping(target = "thumbnailUrl", ignore = true)
+    DescentPreviewDTO toPreviewDTO(DescentEntity entity);
+
+
 }

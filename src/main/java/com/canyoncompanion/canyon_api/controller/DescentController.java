@@ -1,6 +1,7 @@
 package com.canyoncompanion.canyon_api.controller;
 
 import com.canyoncompanion.canyon_api.dtos.requests.DescentRequestDTO;
+import com.canyoncompanion.canyon_api.dtos.responses.DescentPreviewDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.DescentResponseDTO;
 import com.canyoncompanion.canyon_api.service.DescentService;
 import jakarta.validation.Valid;
@@ -37,7 +38,7 @@ public class DescentController {
     })
     @GetMapping
 
-    public ResponseEntity<PageResponse<DescentResponseDTO>> getAllDescents(
+    public ResponseEntity<PageResponse<DescentPreviewDTO>> getAllDescents(
             @RequestParam(defaultValue = "name") String field,
             @RequestParam(defaultValue = "false") Boolean desc,
             @RequestParam(defaultValue = "0") Integer page,
