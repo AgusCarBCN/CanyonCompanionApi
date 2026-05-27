@@ -13,7 +13,8 @@ import lombok.*;
 
     public class DescentPreviewDTO {
 
-        private Long id;
+    private Long id;
+
     private String name;
 
     private String location;
@@ -25,6 +26,8 @@ import lombok.*;
     private AquaticCharacter aquaticCharacter;
 
     private Commitment commitment;
+
+    private String userName;
 
     private String thumbnailUrl;
     }

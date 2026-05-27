@@ -47,6 +47,7 @@ public class DescentServiceImpl implements DescentService {
     public PageResponse <DescentPreviewDTO> getAllDescents(String field, Boolean desc, Integer page, Integer size) {
 
         val sort =  Sort.getDescentSort(field,desc);
+        val user = currentUserService.getCurrentUser();
         Pageable pageable = PageRequest.of(page,size, sort);
         val descentsPage = descentRepository.findAll(pageable).map(descentMapper::toPreviewDTO).map(dto -> {
             if (dto.getThumbnailUrl() == null) {
@@ -56,6 +57,7 @@ public class DescentServiceImpl implements DescentService {
                     dto.setThumbnailUrl(thumbnailUrl);
                 }
             }
+            dto.setUserName(user.getUsername());
             return dto;
         });
         return PageResponseMapper.mapToPageResponse(descentsPage);
