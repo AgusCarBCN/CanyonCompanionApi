@@ -31,7 +31,9 @@ public enum ErrorCode {
     FAILED_GPX_UPLOAD("Failed to upload GPX"),
     INVALID_IMAGE_TYPE("Invalid image type"),
     INVALID_FILE_TYPE("Invalid file type"),
-    INVALID_EXTENSION("Invalid file extension");
+    INVALID_EXTENSION("Invalid file extension"),
+    IMAGE_TOO_BIG("Image is too big"),
+    GPX_FILE_TOO_BIG("GPX file is too big");
     private final String defaultMessage;
 
     ErrorCode(String defaultMessage) {

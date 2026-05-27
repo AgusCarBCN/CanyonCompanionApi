@@ -25,6 +25,10 @@ public class StorageServiceImpl implements StorageService {
 
     private static final String GPX_DIR = "/data/routes/gpx/";
 
+
+    private static final long MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+    private static final long MAX_GPX_SIZE = 10 * 1024 * 1024;  // 10MB
+
     @Override
     public String saveImage(MultipartFile file, StorageType type) {
 
@@ -216,6 +220,13 @@ public class StorageServiceImpl implements StorageService {
                     ErrorCode.INVALID_EXTENSION.getDefaultMessage(),
                     HttpStatus.BAD_REQUEST);
         }
+        if(file.getSize() > MAX_IMAGE_SIZE) {
+            throw new BusinessException(
+                    "Image too large",
+                    ErrorCode.IMAGE_TOO_BIG.getDefaultMessage(),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
     }
     private void validateGpx(MultipartFile file) {
 
@@ -231,6 +242,67 @@ public class StorageServiceImpl implements StorageService {
             throw new BusinessException(
                     "Only GPX files allowed",
                     ErrorCode.INVALID_FILE_TYPE.getDefaultMessage(),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+        if(file.getSize() > MAX_GPX_SIZE) {
+            throw new BusinessException(
+                    "Gpx file too large",
+                    ErrorCode.GPX_FILE_TOO_BIG.getDefaultMessage(),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
+    private void validateImagev2(MultipartFile file) {
+
+        validateFileNotEmpty(file, "Image");
+        validateFileSize(file, MAX_IMAGE_SIZE, ErrorCode.IMAGE_TOO_BIG, "Image");
+
+        String contentType = file.getContentType();
+
+        if (contentType == null ||
+                !List.of("image/jpeg", "image/png", "image/webp").contains(contentType)) {
+
+            throw new BusinessException(
+                    "Invalid image type",
+                    ErrorCode.INVALID_IMAGE_TYPE.getDefaultMessage(),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
+    private void validateGpxv2(MultipartFile file) {
+
+        validateFileNotEmpty(file, "GPX");
+        validateFileSize(file, MAX_GPX_SIZE, ErrorCode.GPX_FILE_TOO_BIG, "GPX");
+
+        String name = file.getOriginalFilename();
+
+        if (name == null || !name.toLowerCase().endsWith(".gpx")) {
+            throw new BusinessException(
+                    "Only GPX files allowed",
+                    ErrorCode.INVALID_FILE_TYPE.getDefaultMessage(),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
+
+    private void validateFileNotEmpty(MultipartFile file, String type) {
+        if (file == null || file.isEmpty()) {
+            throw new BusinessException(
+                    " file is empty",
+                    ErrorCode.FILE_IS_EMPTY.getDefaultMessage(),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
+    private void validateFileSize(MultipartFile file,
+                                  long maxSize,
+                                  ErrorCode errorCode,
+                                  String type) {
+        if (file.getSize() > maxSize) {
+            throw new BusinessException(
+                    " file too large",
+                    errorCode.getDefaultMessage(),
                     HttpStatus.BAD_REQUEST
             );
         }
