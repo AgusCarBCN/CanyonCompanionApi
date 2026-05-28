@@ -7,9 +7,15 @@ import com.canyoncompanion.canyon_api.dtos.responses.DescentPreviewDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.DescentResponseDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.PageResponse;
 import com.canyoncompanion.canyon_api.model.entities.DescentEntity;
+import com.canyoncompanion.canyon_api.model.enums.AquaticCharacter;
+import com.canyoncompanion.canyon_api.model.enums.Commitment;
+import com.canyoncompanion.canyon_api.model.enums.VerticalCharacter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface DescentService {
@@ -95,6 +101,17 @@ public interface DescentService {
     void createDescent(
             DescentRequestDTO dto,
             List<MultipartFile> files
+    );
+     PageResponse<DescentPreviewDTO> getDescents(
+
+            String name,
+            String location,
+            String province,
+            VerticalCharacter verticalCharacter,
+            AquaticCharacter aquaticCharacter,
+            Commitment commitment,
+            LocalDateTime from,
+            LocalDateTime to
     );
 
 }

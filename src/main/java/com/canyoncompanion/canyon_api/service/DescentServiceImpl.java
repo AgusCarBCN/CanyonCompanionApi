@@ -10,9 +10,13 @@ import com.canyoncompanion.canyon_api.exception.ErrorCode;
 import com.canyoncompanion.canyon_api.model.entities.DescentEntity;
 import com.canyoncompanion.canyon_api.model.entities.DescentImageEntity;
 import com.canyoncompanion.canyon_api.model.entities.UserEntity;
+import com.canyoncompanion.canyon_api.model.enums.AquaticCharacter;
+import com.canyoncompanion.canyon_api.model.enums.Commitment;
+import com.canyoncompanion.canyon_api.model.enums.VerticalCharacter;
 import com.canyoncompanion.canyon_api.repository.DescentImageRepository;
 import com.canyoncompanion.canyon_api.repository.DescentRepository;
 import com.canyoncompanion.canyon_api.repository.UserRepository;
+import com.canyoncompanion.canyon_api.repository.specifications.DescentSpecification;
 import com.canyoncompanion.canyon_api.util.helpers.Sort;
 import com.canyoncompanion.canyon_api.util.mappers.DescentImageMapper;
 import com.canyoncompanion.canyon_api.util.mappers.DescentMapper;
@@ -20,8 +24,10 @@ import com.canyoncompanion.canyon_api.util.mappers.PageResponseMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -131,7 +137,7 @@ public class DescentServiceImpl implements DescentService {
         }
 
         // 3. subir nuevas imágenes
-        if (files != null && files.length > 0) {
+        if (files != null) {
 
             for (MultipartFile file : files) {
 
@@ -308,13 +314,50 @@ public class DescentServiceImpl implements DescentService {
             descentImageRepository.saveAll(images);
         }
     }
+
+    @Override
+    public PageResponse<DescentPreviewDTO> getDescents(String name, String location, String province, VerticalCharacter verticalCharacter, AquaticCharacter aquaticCharacter, Commitment commitment, LocalDateTime from, LocalDateTime to) {
+        Specification<DescentEntity> specification =
+                DescentSpecification.filter(
+                        name,
+                        location,
+                        province,
+                        verticalCharacter,
+                        aquaticCharacter,
+                        commitment,
+                        from,
+                        to
+                );
+        val sort =  Sort.getDescentSort("createdAt",true);
+
+        Pageable pageable = PageRequest.of(0,10, sort);
+        val descentsPage = descentRepository.findAll(specification,pageable)
+                .map(entity->
+                        DescentPreviewDTO.builder()
+                        .id(entity.getId())
+                        .name(entity.getName())
+                        .location(entity.getLocation())
+                        .province(entity.getProvince())
+                        .verticalCharacter(entity.getVerticalCharacter())
+                        .aquaticCharacter(entity.getAquaticCharacter())
+                        .commitment(entity.getCommitment())
+                        .userName(entity.getUser().getUsername())
+                        .thumbnailUrl(buildThumbnail(entity.getImages()))
+                        .build()
+                );
+
+        return PageResponseMapper.mapToPageResponse(descentsPage);
+
+    }
+
+
     private String buildThumbnail(List<DescentImageEntity> images) {
 
         if (images == null || images.isEmpty()) {
             return null;
         }
 
-        return images.get(0).getImageUrl();
+        return images.getFirst().getImageUrl();
     }
 }
 

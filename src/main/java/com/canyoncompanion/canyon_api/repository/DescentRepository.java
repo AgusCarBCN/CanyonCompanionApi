@@ -3,14 +3,16 @@ package com.canyoncompanion.canyon_api.repository;
 import com.canyoncompanion.canyon_api.model.entities.DescentEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface DescentRepository extends JpaRepository<DescentEntity, Long> {
+public interface DescentRepository extends JpaRepository<DescentEntity, Long>, JpaSpecificationExecutor<DescentEntity> {
 
     // =====================================================
     // OWNERSHIP QUERIES (DESCENSOS DEL USUARIO)
@@ -69,5 +71,7 @@ public interface DescentRepository extends JpaRepository<DescentEntity, Long> {
             WHERE d.id = :id
             """)
     Optional<DescentEntity> findByIdWithImages(@Param("id") Long id);
+
+    Page<DescentEntity> findAll(Specification<DescentEntity> spec, Pageable pageable);
 }
 
