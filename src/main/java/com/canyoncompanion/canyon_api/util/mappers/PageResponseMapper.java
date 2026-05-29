@@ -12,9 +12,7 @@ public class PageResponseMapper<T> {
                 page.getNumber(),
                 page.getSize(),
                 page.getTotalElements(),
-                page.getTotalPages(),
-                page.getSort()
-
+                page.getTotalPages()
         );
 
         return response;
