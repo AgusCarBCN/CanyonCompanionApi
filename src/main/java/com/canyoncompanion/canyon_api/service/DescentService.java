@@ -109,9 +109,7 @@ public interface DescentService {
             String province,
             VerticalCharacter verticalCharacter,
             AquaticCharacter aquaticCharacter,
-            Commitment commitment,
-            LocalDateTime from,
-            LocalDateTime to
+            Commitment commitment
     );
 
 }

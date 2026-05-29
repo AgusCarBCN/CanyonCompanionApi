@@ -316,7 +316,7 @@ public class DescentServiceImpl implements DescentService {
     }
 
     @Override
-    public PageResponse<DescentPreviewDTO> getDescents(String name, String location, String province, VerticalCharacter verticalCharacter, AquaticCharacter aquaticCharacter, Commitment commitment, LocalDateTime from, LocalDateTime to) {
+    public PageResponse<DescentPreviewDTO> getDescents(String name, String location, String province, VerticalCharacter verticalCharacter, AquaticCharacter aquaticCharacter, Commitment commitment) {
         Specification<DescentEntity> specification =
                 DescentSpecification.filter(
                         name,
@@ -324,9 +324,8 @@ public class DescentServiceImpl implements DescentService {
                         province,
                         verticalCharacter,
                         aquaticCharacter,
-                        commitment,
-                        from,
-                        to
+                        commitment
+
                 );
         val sort =  Sort.getDescentSort("createdAt",true);
 

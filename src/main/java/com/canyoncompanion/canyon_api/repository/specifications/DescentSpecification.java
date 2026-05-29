@@ -19,9 +19,7 @@ public class DescentSpecification {
             String province,
             VerticalCharacter verticalCharacter,
             AquaticCharacter aquaticCharacter,
-            Commitment commitment,
-            LocalDateTime from,
-            LocalDateTime to
+            Commitment commitment
     ) {
 
         return (root, query, cb) -> {
@@ -86,34 +84,6 @@ public class DescentSpecification {
             if (commitment != null) {
                 predicates.add(
                         cb.equal(root.get("commitment"), commitment)
-                );
-            }
-
-            // =========================
-            // DATE RANGE
-            // =========================
-            if (from != null && to != null) {
-
-                // =========================
-                // NORMALIZAR RANGO
-                // =========================
-                LocalDateTime start = from.isBefore(to) ? from : to;
-                LocalDateTime end = from.isBefore(to) ? to : from;
-
-                predicates.add(
-                        cb.between(root.get("createdAt"), start, end)
-                );
-
-            } else if (from != null) {
-
-                predicates.add(
-                        cb.greaterThanOrEqualTo(root.get("createdAt"), from)
-                );
-
-            } else if (to != null) {
-
-                predicates.add(
-                        cb.lessThanOrEqualTo(root.get("createdAt"), to)
                 );
             }
             return cb.and(predicates.toArray(new Predicate[0]));
