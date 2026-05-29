@@ -45,7 +45,10 @@ public class DescentSpecification {
             // =========================
             if (location != null && !location.isBlank()) {
                 predicates.add(
-                        cb.equal(root.get("location"), location)
+                        cb.like(
+                                cb.lower(root.get("location")),
+                                "%" + location.toLowerCase() + "%"
+                        )
                 );
             }
 
@@ -54,7 +57,10 @@ public class DescentSpecification {
             // =========================
             if (province != null && !province.isBlank()) {
                 predicates.add(
-                        cb.equal(root.get("province"), province)
+                        cb.like(
+                                cb.lower(root.get("province")),
+                                "%" + province.toLowerCase() + "%"
+                        )
                 );
             }
 
@@ -87,19 +93,29 @@ public class DescentSpecification {
             // DATE RANGE
             // =========================
             if (from != null && to != null) {
+
+                // =========================
+                // NORMALIZAR RANGO
+                // =========================
+                LocalDateTime start = from.isBefore(to) ? from : to;
+                LocalDateTime end = from.isBefore(to) ? to : from;
+
                 predicates.add(
-                        cb.between(root.get("createdAt"), from, to)
+                        cb.between(root.get("createdAt"), start, end)
                 );
+
             } else if (from != null) {
+
                 predicates.add(
                         cb.greaterThanOrEqualTo(root.get("createdAt"), from)
                 );
+
             } else if (to != null) {
+
                 predicates.add(
                         cb.lessThanOrEqualTo(root.get("createdAt"), to)
                 );
             }
-
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }

@@ -53,9 +53,9 @@ public class PageResponse<T> {
     )
     private int totalPages;
 
-    @Schema(
+   /* @Schema(
             description = "Sorting information for the page"
     )
-    private Sort sort;
+    private Sort sort;*/
 }
 
