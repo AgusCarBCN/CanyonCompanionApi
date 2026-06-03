@@ -31,7 +31,7 @@ public class UserRequestDTO {
     @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
     private String username;
 
-    @Schema(
+    /*@Schema(
             description = "User's surname",
             example = "Doe",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED,
@@ -39,7 +39,7 @@ public class UserRequestDTO {
             maxLength = 100
     )
     @Size(min = 3, max = 100, message = "Surname must be between 3 and 100 characters")
-    private String surname;
+    private String surname;*/
 
 
     @Schema(

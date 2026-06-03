@@ -42,7 +42,7 @@ public class LoadingAdminUser {
 
                 UserEntity admin = UserEntity.builder()
                         .username("admin")
-                        .surname("admin")
+                        //.surname("admin")
                         .email("agusticar@gmail.com")
                         .password(passwordEncoder.encode("Admin123$$"))
                         .status(UserStatus.ACTIVE)

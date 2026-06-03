@@ -40,7 +40,7 @@ public class UserUpdateServiceImpl implements UserUpdateService {
                         HttpStatus.NOT_FOUND));
 
         if (request.getName() != null) user.setUsername(request.getName());
-        if (request.getSurname() != null) user.setSurname(request.getSurname());
+        //if (request.getSurname() != null) user.setSurname(request.getSurname());
         if (request.getEmail() != null) user.setEmail(request.getEmail());
         if (request.getPassword() != null) user.setPassword(request.getPassword());
       //  if (request.getProfileImage() != null) user.se(request.getProfileImage());

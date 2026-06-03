@@ -10,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.springframework.lang.Nullable;
-
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
@@ -28,8 +26,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     // FIND TOKEN
     // =====================================================
     @Override
-    @Nullable
-    public RefreshTokenEntity findByToken(@Nullable String token) {
+
+    public RefreshTokenEntity findByToken(String token) {
 
         RefreshTokenEntity refreshToken = repository.findByToken(token)
                 .orElseThrow(() -> new BusinessException(
@@ -56,8 +54,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     // LOGIN FLOW (crear sesión nueva)
     // =====================================================
     @Override
-    public String generateLoginToken(@Nullable UserDetails userDetails) {
+    public String generateLoginToken(UserDetails userDetails) {
 
+        assert userDetails != null;
         UserEntity user = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -72,7 +71,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     // REFRESH FLOW (rotación real)
     // =====================================================
     @Override
-    public String rotateToken(@Nullable RefreshTokenEntity oldToken) {
+    public String rotateToken(RefreshTokenEntity oldToken) {
 
         if (oldToken == null || oldToken.getUser() == null) {
             throw new BusinessException(
@@ -103,8 +102,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     // =====================================================
     // CORE GENERATION
     // =====================================================
-    @Nullable
-    private String generateAndSaveToken(@Nullable UserEntity user) {
+
+    private String generateAndSaveToken(UserEntity user) {
         RefreshTokenEntity token = RefreshTokenEntity.builder()
                 .token(UUID.randomUUID().toString())
                 .user(user)

@@ -121,10 +121,10 @@ public class UserAuthServiceImpl implements UserAuthService {
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .username(userDetails.getUsername())
-                .roles(userDetails.getAuthorities()
+                /*.roles(userDetails.getAuthorities()
                         .stream()
                         .map(GrantedAuthority::getAuthority)
-                        .toList())
+                        .toList())*/
                 .build();
     }
 
@@ -157,7 +157,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         return UserResponseDTO.builder()
                 .email(user.getEmail())
                 .username(user.getUsername())
-                .surname(user.getSurname())
+                //.surname(user.getSurname())
                 .build();
     }
 
@@ -196,10 +196,10 @@ public class UserAuthServiceImpl implements UserAuthService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .username(userDetails.getUsername())
-                .roles(userDetails.getAuthorities()
+                /*.roles(userDetails.getAuthorities()
                         .stream()
                         .map(GrantedAuthority::getAuthority)
-                        .toList())
+                        .toList())*/
                 .build();
     }
 

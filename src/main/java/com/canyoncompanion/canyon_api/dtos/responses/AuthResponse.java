@@ -35,10 +35,10 @@ public class AuthResponse {
             example = "john.doe@example.com"
     )
     private String username;
-
+/*
     @Schema(
             description = "List of roles assigned to the user",
             example = "[\"ROLE_USER\", \"ROLE_ADMIN\"]"
     )
-    private List<String> roles;
+    private List<String> roles;*/
 }
