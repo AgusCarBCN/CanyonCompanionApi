@@ -6,6 +6,7 @@ import com.canyoncompanion.canyon_api.dtos.requests.TokenRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.requests.UserRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.AuthResponse;
 import com.canyoncompanion.canyon_api.dtos.responses.UserResponseDTO;
+import com.canyoncompanion.canyon_api.dtos.responses.VerificationEmailResponse;
 import com.canyoncompanion.canyon_api.exception.BusinessException;
 import org.springframework.security.core.Authentication;
 
@@ -18,7 +19,8 @@ public interface UserAuthService {
      * @return the created user information
      * @throws BusinessException if the user already exists in the system
      */
-    AuthResponse registerUser(UserRequestDTO request);
+    //AuthResponse
+    String registerUser(UserRequestDTO request);
 
 
     /**
@@ -60,7 +62,7 @@ public interface UserAuthService {
     UserResponseDTO me(Authentication authentication);
 
 
-    boolean resendVerificationEmail(String email);
+    VerificationEmailResponse VerificationEmail(String verificationToken);
 
     /**
      * Confirms a user account using a verification token.
@@ -69,4 +71,6 @@ public interface UserAuthService {
      * @return true if the account was successfully confirmed
      */
     boolean confirmUserAccount(String verificationToken);
+
+
 }

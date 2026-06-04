@@ -6,21 +6,29 @@ import com.canyoncompanion.canyon_api.model.entities.RefreshTokenEntity;
 import com.canyoncompanion.canyon_api.model.entities.UserEntity;
 import com.canyoncompanion.canyon_api.repository.RefreshTokenRepository;
 import com.canyoncompanion.canyon_api.repository.UserRepository;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
+import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class RefreshTokenServiceImpl implements RefreshTokenService {
+public class TokenServiceImpl implements TokenService {
 
     private final RefreshTokenRepository repository;
     private final UserRepository userRepository;
-
+    private final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private final long EXPIRATION_TIME = 86400000;
 
     // =====================================================
     // FIND TOKEN
@@ -56,14 +64,27 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     public String generateLoginToken(UserDetails userDetails) {
 
-        assert userDetails != null;
-        UserEntity user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+            assert userDetails != null;
+            UserEntity user = userRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // si quieres 1 sola sesión por usuario
-        repository.deleteByUser(user);
+            // si quieres 1 sola sesión por usuario
+            repository.deleteByUser(user);
 
-        return generateAndSaveToken(user);
+            return generateAndSaveToken(user);
+    }
+
+    @Override
+    public String generateValidationToken(String email) {
+
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
+                .compact();
+
+
     }
 
 
@@ -99,6 +120,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
 
+
     // =====================================================
     // CORE GENERATION
     // =====================================================
@@ -113,4 +135,32 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         repository.save(token);
         return token.getToken();
     }
+    public boolean validateToken(String token) {
+        return !isTokenExpired(token);
+    }
+
+    public String extractEmail(String token) {
+        JwtParser jwtParser = Jwts.parserBuilder()
+                .setSigningKey(SECRET_KEY)
+                .build();
+
+        return jwtParser.parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    private Date extractExpiration(String token) {
+        JwtParser jwtParser = Jwts.parserBuilder()
+                .setSigningKey(SECRET_KEY)
+                .build();
+
+        return jwtParser.parseClaimsJws(token)
+                .getBody()
+                .getExpiration();
+    }
+
 }

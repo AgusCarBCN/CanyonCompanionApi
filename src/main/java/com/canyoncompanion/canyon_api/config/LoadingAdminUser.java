@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@Configuration
+/*@Configuration
 @AllArgsConstructor
 @Slf4j
 public class LoadingAdminUser {
@@ -60,5 +60,5 @@ public class LoadingAdminUser {
             }
         };
     }
-}
+}*/
 

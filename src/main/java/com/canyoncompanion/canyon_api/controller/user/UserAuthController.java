@@ -6,6 +6,9 @@ import com.canyoncompanion.canyon_api.dtos.requests.TokenRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.requests.UserRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.AuthResponse;
 import com.canyoncompanion.canyon_api.dtos.responses.UserResponseDTO;
+import com.canyoncompanion.canyon_api.dtos.responses.VerificationEmailResponse;
+import com.canyoncompanion.canyon_api.service.TokenService;
+import com.canyoncompanion.canyon_api.service.TokenServiceImpl;
 import com.canyoncompanion.canyon_api.service.user.UserAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -40,12 +43,19 @@ public class UserAuthController {
     })
     @PostMapping("/register")
 
-    public ResponseEntity<AuthResponse> registerUser(
+    public ResponseEntity<String> registerUser(
             @RequestBody @Valid UserRequestDTO userRequestDTO
     ) {
         // Crear usuario
         var response=userAuthService.registerUser(userRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    // ---------------------------
+    // Verification email
+    // ---------------------------
+    @GetMapping("/register/verify")
+    public VerificationEmailResponse verifyEmail(@RequestParam("token") String token) {
+        return userAuthService.VerificationEmail(token);
     }
 
     // ---------------------------
@@ -68,7 +78,23 @@ public class UserAuthController {
         var response=userAuthService.login(request);
         return ResponseEntity.ok(response);
     }
+    /*@GetMapping("/register/verify")
+    public ResponseEntity verifyEmail(@RequestParam("token") String token) {
+        String emailString = tokenService.extractEmail(token);
+        MyAppUser user = myAppUserRepository.findByEmail(emailString);
+        if (user == null || user.getVerficationToken() == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token Expired!");
+        }
 
+        if (!jwtUtil.validateToken(token) || !user.getVerficationToken().equals(token)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token Expired!");
+        }
+        user.setVerficationToken(null);
+        user.setVerified(true);
+        myAppUserRepository.save(user);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("Email successfully verified!");
+    }*/
 
     // ---------------------------
     // Refresh Token

@@ -13,6 +13,8 @@ public enum UserStatus {
 
     @Schema(description = "Deactivated user account (soft delete)")
     DEACTIVATED,
+    @Schema(description = "Pending verification account")
+    PENDING_VERIFICATION,
 
     @Schema(description = "Suspended account, blocked by admin")
     SUSPENDED

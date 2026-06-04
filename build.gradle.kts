@@ -4,6 +4,7 @@ plugins {
 	java
 	id("org.springframework.boot") version "4.0.0"
 	id("io.spring.dependency-management") version "1.1.7"
+	kotlin("jvm")
 }
 
 group = "com.canyoncompanion"
@@ -38,7 +39,7 @@ dependencies {
 	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
-
+	implementation ("org.springframework.boot:spring-boot-starter-mail")
 	// =========================
 	// POSTGRESQL
 	// =========================
@@ -75,6 +76,7 @@ dependencies {
 	// =========================
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
+	implementation(kotlin("stdlib-jdk8"))
 }
 
 tasks.withType<Test> {

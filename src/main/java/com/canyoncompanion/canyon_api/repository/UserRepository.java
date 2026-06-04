@@ -25,9 +25,12 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Optional<UserEntity> findByEmail(String email);
 
+
+    //UserEntity findByEmail(String email);
+
     /* =========================
-       FILTROS
-       ========================= */
+           FILTROS
+           ========================= */
     @Query("from UserEntity  where status= 'ACTIVE'")
     Page<UserEntity> findAllActive (Pageable pageable);
 
@@ -43,6 +46,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
 
     boolean existsByEmailIgnoreCase(String email);
+
+    boolean existsByEmailIgnoreCaseAndStatus(String email, UserStatus status);
 
     /* =========================
        MÉTRICAS
