@@ -1,12 +1,8 @@
 package com.canyoncompanion.canyon_api.controller.user;
 
 
-import com.canyoncompanion.canyon_api.dtos.requests.AuthRequestDTO;
-import com.canyoncompanion.canyon_api.dtos.requests.TokenRequestDTO;
-import com.canyoncompanion.canyon_api.dtos.requests.UserRequestDTO;
-import com.canyoncompanion.canyon_api.dtos.responses.AuthResponse;
-import com.canyoncompanion.canyon_api.dtos.responses.UserResponseDTO;
-import com.canyoncompanion.canyon_api.dtos.responses.VerificationEmailResponse;
+import com.canyoncompanion.canyon_api.dtos.requests.*;
+import com.canyoncompanion.canyon_api.dtos.responses.*;
 import com.canyoncompanion.canyon_api.service.TokenService;
 import com.canyoncompanion.canyon_api.service.TokenServiceImpl;
 import com.canyoncompanion.canyon_api.service.user.UserAuthService;
@@ -43,7 +39,7 @@ public class UserAuthController {
     })
     @PostMapping("/register")
 
-    public ResponseEntity<String> registerUser(
+    public ResponseEntity<RegisterResponse> registerUser(
             @RequestBody @Valid UserRequestDTO userRequestDTO
     ) {
         // Crear usuario
@@ -57,6 +53,34 @@ public class UserAuthController {
     public VerificationEmailResponse verifyEmail(@RequestParam("token") String token) {
         return userAuthService.VerificationEmail(token);
     }
+    // ---------------------------
+    // Forgot password
+    // ---------------------------
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ForgotPasswordResponse> forgotPassword(
+            @RequestBody @Valid ForgotPasswordRequest request
+            ) {
+        var response=userAuthService.forgotPassword(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    // ---------------------------
+    // Verification email forgot password
+    // ---------------------------
+    @GetMapping("/forgot-password/verify")
+    public VerificationEmailResponse verifyEmailForgotPassword(@RequestParam("token") String token) {
+        return userAuthService.VerificationEmailForgotPassword(token);
+    }
+    // ---------------------------
+    // Forgot password
+    // ---------------------------
+    @PatchMapping("/reset-password")
+    public ResponseEntity<ResetPasswordResponse> resetPassword(
+            @RequestBody @Valid ResetPasswordRequest request
+    ) {
+        var response=userAuthService.newPassword(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
 
     // ---------------------------
     // Login

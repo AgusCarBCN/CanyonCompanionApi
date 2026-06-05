@@ -36,7 +36,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
         public void sendForgotPasswordEmail(String email, String resetToken) {
             String subject = "Password Reset Request";
-            String path = "/req/reset-password";
+            String path = "/api/auth/forgot-password/verify";
             String message = "Click the button below to reset your password:";
             sendEmail(email, resetToken, subject, path, message);
         }

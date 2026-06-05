@@ -31,11 +31,10 @@ public class UserEntity {
     @Column(nullable = false, length = 50)
     private String username;
 
-   /* @Column(nullable = false, length = 200)
-    private String surname;*/
+
     private String verificationToken;
-    //@Enumerated(EnumType.STRING)
-   // private Roles role;
+    private String resetToken;
+
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 

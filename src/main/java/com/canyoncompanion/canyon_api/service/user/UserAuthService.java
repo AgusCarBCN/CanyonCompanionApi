@@ -1,16 +1,14 @@
 package com.canyoncompanion.canyon_api.service.user;
 
 
-import com.canyoncompanion.canyon_api.dtos.requests.AuthRequestDTO;
-import com.canyoncompanion.canyon_api.dtos.requests.TokenRequestDTO;
-import com.canyoncompanion.canyon_api.dtos.requests.UserRequestDTO;
-import com.canyoncompanion.canyon_api.dtos.responses.AuthResponse;
-import com.canyoncompanion.canyon_api.dtos.responses.UserResponseDTO;
-import com.canyoncompanion.canyon_api.dtos.responses.VerificationEmailResponse;
+import com.canyoncompanion.canyon_api.dtos.requests.*;
+import com.canyoncompanion.canyon_api.dtos.responses.*;
 import com.canyoncompanion.canyon_api.exception.BusinessException;
 import org.springframework.security.core.Authentication;
 
 public interface UserAuthService {
+
+    ForgotPasswordResponse forgotPassword(ForgotPasswordRequest request);
 
     /**
      * Registers a new user in the system.
@@ -20,8 +18,9 @@ public interface UserAuthService {
      * @throws BusinessException if the user already exists in the system
      */
     //AuthResponse
-    String registerUser(UserRequestDTO request);
+    RegisterResponse registerUser(UserRequestDTO request);
 
+     ResetPasswordResponse newPassword(ResetPasswordRequest request);
 
     /**
      * Login user in the system.
@@ -63,7 +62,7 @@ public interface UserAuthService {
 
 
     VerificationEmailResponse VerificationEmail(String verificationToken);
-
+    VerificationEmailResponse VerificationEmailForgotPassword(String verificationToken);
     /**
      * Confirms a user account using a verification token.
      *

@@ -1,12 +1,8 @@
 package com.canyoncompanion.canyon_api.service.user;
 
 
-import com.canyoncompanion.canyon_api.dtos.requests.AuthRequestDTO;
-import com.canyoncompanion.canyon_api.dtos.requests.TokenRequestDTO;
-import com.canyoncompanion.canyon_api.dtos.requests.UserRequestDTO;
-import com.canyoncompanion.canyon_api.dtos.responses.AuthResponse;
-import com.canyoncompanion.canyon_api.dtos.responses.UserResponseDTO;
-import com.canyoncompanion.canyon_api.dtos.responses.VerificationEmailResponse;
+import com.canyoncompanion.canyon_api.dtos.requests.*;
+import com.canyoncompanion.canyon_api.dtos.responses.*;
 import com.canyoncompanion.canyon_api.exception.BusinessException;
 import com.canyoncompanion.canyon_api.exception.ErrorCode;
 import com.canyoncompanion.canyon_api.model.entities.RefreshTokenEntity;
@@ -19,12 +15,10 @@ import com.canyoncompanion.canyon_api.repository.RoleRepository;
 import com.canyoncompanion.canyon_api.repository.UserRepository;
 import com.canyoncompanion.canyon_api.security.JwtService;
 import com.canyoncompanion.canyon_api.service.EmailService;
-import com.canyoncompanion.canyon_api.service.TokenService;
 import com.canyoncompanion.canyon_api.service.TokenServiceImpl;
 import com.canyoncompanion.canyon_api.util.mappers.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.security.autoconfigure.SecurityProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -58,10 +52,40 @@ public class UserAuthServiceImpl implements UserAuthService {
     private final EmailService emailService;
 
     // =====================================================
+    // FORGOT PASSWORD - (solo genera token)
+    // =====================================================
+    @Override
+    public ForgotPasswordResponse forgotPassword(ForgotPasswordRequest request) {
+
+        UserEntity user = userRepository.findByEmail(request.getEmail())
+                .orElse(null);
+
+        // Siempre responder igual por seguridad
+        if (user == null || user.getStatus() != UserStatus.ACTIVE) {
+
+            return ForgotPasswordResponse.builder().message("If the email exists, you will receive a password reset link.").build();
+        }
+
+        // Generar token específico para reset password
+        String resetToken = tokenService.generateValidationToken(request.getEmail());
+        user.setResetToken(resetToken);
+        user.setStatusDescription("Password reset requested, pending token validation");
+        userRepository.save(user);
+
+        // Enviar email
+        emailService.sendForgotPasswordEmail(
+                user.getEmail(),
+                resetToken
+        );
+
+        return ForgotPasswordResponse.builder().message("The email has been sent.").build();
+    }
+
+    // =====================================================
     // REGISTER
     // =====================================================
     @Override
-    public String registerUser(UserRequestDTO request) {
+    public RegisterResponse registerUser(UserRequestDTO request) {
 
         UserEntity existingUser=userRepository.findByEmail(request.getEmail()).orElse(null);
         if (existingUser!=null) {
@@ -76,7 +100,7 @@ public class UserAuthServiceImpl implements UserAuthService {
                 existingUser.setVerificationToken(verificationToken);
                 userRepository.save(existingUser);
                 emailService.sendVerificationEmail(existingUser.getEmail(), verificationToken);
-                return "Verification Email resent. Check your inbox";
+                return RegisterResponse.builder().message("Verification Email resent. Check your inbox").build();
             }
         }
         //Nuevo usuario
@@ -92,7 +116,27 @@ public class UserAuthServiceImpl implements UserAuthService {
         //Send email
         emailService.sendVerificationEmail(user.getEmail(), verificationToken);
 
-        return "Verification is successful";
+        return RegisterResponse.builder().message("Verification is successful").build();
+
+    }
+
+    @Override
+    public ResetPasswordResponse newPassword(ResetPasswordRequest request) {
+        String email = tokenService.extractEmail(request.getToken());
+
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow();
+
+        if (!tokenService.validateToken(request.getToken())
+                || !request.getToken().equals(user.getResetToken())) {
+            return ResetPasswordResponse.builder().message("Token Expired!").build();
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword())); // 🔥 AQUÍ
+        user.setResetToken(null);
+        user.setStatusDescription("Password updated");
+        userRepository.save(user);
+        return ResetPasswordResponse.builder().message("Password updated successfully!").build();
     }
 
     // =====================================================
@@ -193,6 +237,23 @@ public class UserAuthServiceImpl implements UserAuthService {
         user.setVerificationToken(null);
         user.setStatus(UserStatus.ACTIVE);
         user.setStatusDescription("User email verified and account activated");
+        userRepository.save(user);
+        return VerificationEmailResponse.builder().message("Email verified successfully!").build();
+    }
+
+    @Override
+    public VerificationEmailResponse VerificationEmailForgotPassword(String resetToken) {
+        String emailString = tokenService.extractEmail(resetToken);
+        UserEntity user = userRepository.findByEmail(emailString).orElseThrow();
+        if (user == null || user.getResetToken() == null) {
+            return VerificationEmailResponse.builder().message("Token Expired!").build();
+        }
+        if (!tokenService.validateToken(resetToken) || !user.getResetToken().equals(resetToken)) {
+            return VerificationEmailResponse.builder().message("Token Expired!").build();
+        }
+        //user.setResetToken(null);
+        user.setStatus(UserStatus.ACTIVE);
+        user.setStatusDescription("User email verified to reset password");
         userRepository.save(user);
         return VerificationEmailResponse.builder().message("Email verified successfully!").build();
     }
