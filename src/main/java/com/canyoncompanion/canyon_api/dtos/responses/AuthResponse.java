@@ -1,5 +1,6 @@
 package com.canyoncompanion.canyon_api.dtos.responses;
 
+import com.canyoncompanion.canyon_api.model.enums.UserStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,6 +36,8 @@ public class AuthResponse {
             example = "john.doe@example.com"
     )
     private String username;
+
+    private UserStatus status;
 /*
     @Schema(
             description = "List of roles assigned to the user",

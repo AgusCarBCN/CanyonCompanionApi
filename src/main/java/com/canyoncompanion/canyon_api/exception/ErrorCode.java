@@ -8,6 +8,7 @@ public enum ErrorCode {
     USER_IS_DEACTIVATE("User has been deactivated"),
     USER_IS_ACTIVATE("User has been activated"),
     USER_IS_SUSPEND("User has been suspende because "),
+    USER_VERIFICATION_PENDING("User has been pending verification"),
     ADMIN_AUTHORIZE("Only an admin user can "),
     USER_DEACTIVATED_REASON("User deactivated because"),
     INVALID_CREDENTIALS_PASSWORD("Invalid password"),

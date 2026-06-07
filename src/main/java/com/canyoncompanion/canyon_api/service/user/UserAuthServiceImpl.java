@@ -145,7 +145,30 @@ public class UserAuthServiceImpl implements UserAuthService {
     @Override
     public AuthResponse login(AuthRequestDTO request) {
 
+        UserEntity user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.USER_NOT_FOUND.name(),
+                        ErrorCode.USER_NOT_FOUND.getDefaultMessage(),
+                        HttpStatus.NOT_FOUND
+                ));
+
+        if (user.getStatus().equals(UserStatus.PENDING_VERIFICATION)) {
+            throw new BusinessException(
+                    ErrorCode.USER_VERIFICATION_PENDING.name(),
+                    ErrorCode.USER_VERIFICATION_PENDING.getDefaultMessage(),
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
         authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+
+        return generateAuthSession(user);
+        /*authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
@@ -158,8 +181,14 @@ public class UserAuthServiceImpl implements UserAuthService {
                         ErrorCode.USER_NOT_FOUND.getDefaultMessage(),
                         HttpStatus.NOT_FOUND
                 ));
+        if(user.getStatus().equals(UserStatus.PENDING_VERIFICATION)) {
+            throw new BusinessException(
+                    ErrorCode.USER_VERIFICATION_PENDING.name(),
+                    ErrorCode.USER_VERIFICATION_PENDING.getDefaultMessage(),
+                    HttpStatus.FORBIDDEN);
+        }
 
-        return generateAuthSession(user);
+        return generateAuthSession(user);*/
     }
 
     // =====================================================
