@@ -306,18 +306,21 @@ public class UserAuthServiceImpl implements UserAuthService {
         String refreshToken =
                 tokenService.generateLoginToken(userDetails);
 
-        return buildAuthResponse(userDetails, accessToken, refreshToken);
+        return buildAuthResponse(userDetails, accessToken, refreshToken,user.getStatus());
     }
 
     private AuthResponse buildAuthResponse(
             UserDetails userDetails,
             String accessToken,
-            String refreshToken
+            String refreshToken,
+            UserStatus status
     ) {
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .username(userDetails.getUsername())
+                .status(status)
+                 // Aquí se podría mapear el status real del usuario si es necesario
                 /*.roles(userDetails.getAuthorities()
                         .stream()
                         .map(GrantedAuthority::getAuthority)
