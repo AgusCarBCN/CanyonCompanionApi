@@ -267,11 +267,37 @@ public class UserAuthServiceImpl implements UserAuthService {
     public VerificationEmailResponse VerificationEmail(String verificationToken) {
         String emailString = tokenService.extractEmail(verificationToken);
         UserEntity user = userRepository.findByEmail(emailString).orElseThrow();
-        if (user == null || user.getVerificationToken() == null) {
-            return VerificationEmailResponse.builder().message("Token Expired!").build();
+        if (user == null) {
+            throw new BusinessException(
+                    ErrorCode.USER_NOT_FOUND.name(),
+                    ErrorCode.USER_NOT_FOUND.getDefaultMessage(),
+                    HttpStatus.NOT_FOUND
+            );
+
         }
-        if (!tokenService.validateToken(verificationToken) || !user.getVerificationToken().equals(verificationToken)) {
-            return VerificationEmailResponse.builder().message("Token Expired!").build();
+        if(user.getVerificationToken()==null) {
+            throw new BusinessException(
+                    ErrorCode.EMPTY_TOKEN.name(),
+                    ErrorCode.EMPTY_TOKEN.getDefaultMessage(),
+                    HttpStatus.NOT_FOUND
+            );
+        }
+
+        if (!user.getVerificationToken().equals(verificationToken)) {
+            throw new BusinessException(
+                    ErrorCode.INVALID_TOKEN.name(),
+                    ErrorCode.INVALID_TOKEN.getDefaultMessage(),
+                    HttpStatus.FORBIDDEN
+            );
+
+        }
+        if (!tokenService.validateToken(verificationToken)) {
+            throw new BusinessException(
+                    ErrorCode.EXPIRED_TOKEN.name(),
+                    ErrorCode.EXPIRED_TOKEN.getDefaultMessage(),
+                    HttpStatus.GONE
+            );
+
         }
         user.setVerificationToken(null);
         user.setStatus(UserStatus.ACTIVE);
@@ -284,12 +310,44 @@ public class UserAuthServiceImpl implements UserAuthService {
     public VerificationEmailResponse VerificationEmailForgotPassword(String resetToken) {
         String emailString = tokenService.extractEmail(resetToken);
         UserEntity user = userRepository.findByEmail(emailString).orElseThrow();
-        if (user == null || user.getResetToken() == null) {
+        if (user == null) {
+            throw new BusinessException(
+                    ErrorCode.USER_NOT_FOUND.name(),
+                    ErrorCode.USER_NOT_FOUND.getDefaultMessage(),
+                    HttpStatus.NOT_FOUND
+            );
+
+        }
+        if(user.getResetToken()==null) {
+            throw new BusinessException(
+                    ErrorCode.EMPTY_TOKEN.name(),
+                    ErrorCode.EMPTY_TOKEN.getDefaultMessage(),
+                    HttpStatus.NOT_FOUND
+            );
+        }
+
+        if (!user.getResetToken().equals(resetToken)) {
+            throw new BusinessException(
+                    ErrorCode.INVALID_TOKEN.name(),
+                    ErrorCode.INVALID_TOKEN.getDefaultMessage(),
+                    HttpStatus.FORBIDDEN
+            );
+
+        }
+        if (!tokenService.validateToken(resetToken)) {
+            throw new BusinessException(
+                    ErrorCode.EXPIRED_TOKEN.name(),
+                    ErrorCode.EXPIRED_TOKEN.getDefaultMessage(),
+                    HttpStatus.GONE
+            );
+
+        }
+        /*if (user == null || user.getResetToken() == null) {
             return VerificationEmailResponse.builder().message("Token Expired!").build();
         }
         if (!tokenService.validateToken(resetToken) || !user.getResetToken().equals(resetToken)) {
             return VerificationEmailResponse.builder().message("Token Expired!").build();
-        }
+        }*/
         //user.setResetToken(null);
         user.setStatus(UserStatus.ACTIVE);
         user.setStatusDescription("User email verified to reset password");

@@ -20,6 +20,8 @@ public enum ErrorCode {
     EMAIL_ALREADY_EXISTS("Email already registered"),
     INVALID_FIELD("Invalid field"),
     INVALID_REFRESH_TOKEN("Invalid refresh token"),
+    INVALID_TOKEN("Invalid token"),
+    EXPIRED_TOKEN("Expired token"),
     NO_OWNER_DESCENT("Only the owner of the descent can perform this action"),
     NO_OWNER_ROUTE("Only the owner of the route can be performed"),
     IMAGE_NOT_UPLOADED("Image is not uploaded"),
@@ -34,7 +36,9 @@ public enum ErrorCode {
     INVALID_FILE_TYPE("Invalid file type"),
     INVALID_EXTENSION("Invalid file extension"),
     IMAGE_TOO_BIG("Image is too big"),
-    GPX_FILE_TOO_BIG("GPX file is too big");
+    GPX_FILE_TOO_BIG("GPX file is too big"),
+    EMPTY_TOKEN("Token is empty"),
+    ;
     private final String defaultMessage;
 
     ErrorCode(String defaultMessage) {

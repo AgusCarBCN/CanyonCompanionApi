@@ -6,9 +6,7 @@ import com.canyoncompanion.canyon_api.model.entities.RefreshTokenEntity;
 import com.canyoncompanion.canyon_api.model.entities.UserEntity;
 import com.canyoncompanion.canyon_api.repository.RefreshTokenRepository;
 import com.canyoncompanion.canyon_api.repository.UserRepository;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -64,14 +62,14 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public String generateLoginToken(UserDetails userDetails) {
 
-            assert userDetails != null;
-            UserEntity user = userRepository.findByEmail(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+        assert userDetails != null;
+        UserEntity user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // si quieres 1 sola sesión por usuario
-            repository.deleteByUser(user);
+        // si quieres 1 sola sesión por usuario
+        repository.deleteByUser(user);
 
-            return generateAndSaveToken(user);
+        return generateAndSaveToken(user);
     }
 
     @Override
@@ -120,7 +118,6 @@ public class TokenServiceImpl implements TokenService {
     }
 
 
-
     // =====================================================
     // CORE GENERATION
     // =====================================================
@@ -135,19 +132,42 @@ public class TokenServiceImpl implements TokenService {
         repository.save(token);
         return token.getToken();
     }
+
     public boolean validateToken(String token) {
         return !isTokenExpired(token);
     }
 
     public String extractEmail(String token) {
-        JwtParser jwtParser = Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
-                .build();
 
-        return jwtParser.parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
+        try {
+
+            JwtParser jwtParser = Jwts.parserBuilder()
+                    .setSigningKey(SECRET_KEY)
+                    .build();
+
+            return jwtParser.parseClaimsJws(token)
+                    .getBody()
+                    .getSubject();
+
+        } catch (ExpiredJwtException e) {
+
+            throw new BusinessException(
+                    "EXPIRED_TOKEN",
+                    "Reset token has expired",
+                    HttpStatus.GONE
+            );
+
+        } catch (JwtException e) {
+
+            throw new BusinessException(
+                    "INVALID_TOKEN",
+                    "Invalid reset token",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
+}
+
 
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
