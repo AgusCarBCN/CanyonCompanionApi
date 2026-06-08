@@ -308,17 +308,28 @@ public class UserAuthServiceImpl implements UserAuthService {
 
     @Override
     public VerificationEmailResponse VerificationEmailForgotPassword(String resetToken) {
-        String emailString = tokenService.extractEmail(resetToken);
-        UserEntity user = userRepository.findByEmail(emailString).orElseThrow();
-        if (user == null) {
-            throw new BusinessException(
-                    ErrorCode.USER_NOT_FOUND.name(),
-                    ErrorCode.USER_NOT_FOUND.getDefaultMessage(),
-                    HttpStatus.NOT_FOUND
-            );
 
+        // 1. Validar JWT primero (firma + expiración)
+        String email = tokenService.extractEmail(resetToken);
+
+        if (!tokenService.validateToken(resetToken)) {
+            throw new BusinessException(
+                    ErrorCode.EXPIRED_TOKEN.name(),
+                    ErrorCode.EXPIRED_TOKEN.getDefaultMessage(),
+                    HttpStatus.GONE
+            );
         }
-        if(user.getResetToken()==null) {
+
+        // 2. Buscar usuario
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.USER_NOT_FOUND.name(),
+                        ErrorCode.USER_NOT_FOUND.getDefaultMessage(),
+                        HttpStatus.NOT_FOUND
+                ));
+
+        // 3. Token vacío
+        if (user.getResetToken() == null) {
             throw new BusinessException(
                     ErrorCode.EMPTY_TOKEN.name(),
                     ErrorCode.EMPTY_TOKEN.getDefaultMessage(),
@@ -326,33 +337,23 @@ public class UserAuthServiceImpl implements UserAuthService {
             );
         }
 
+        // 4. Token mismatch
         if (!user.getResetToken().equals(resetToken)) {
             throw new BusinessException(
                     ErrorCode.INVALID_TOKEN.name(),
                     ErrorCode.INVALID_TOKEN.getDefaultMessage(),
                     HttpStatus.FORBIDDEN
             );
+        }
 
-        }
-        if (!tokenService.validateToken(resetToken)) {
-            throw new BusinessException(
-                    ErrorCode.EXPIRED_TOKEN.name(),
-                    ErrorCode.EXPIRED_TOKEN.getDefaultMessage(),
-                    HttpStatus.GONE
-            );
-
-        }
-        /*if (user == null || user.getResetToken() == null) {
-            return VerificationEmailResponse.builder().message("Token Expired!").build();
-        }
-        if (!tokenService.validateToken(resetToken) || !user.getResetToken().equals(resetToken)) {
-            return VerificationEmailResponse.builder().message("Token Expired!").build();
-        }*/
-        //user.setResetToken(null);
+        // 5. OK
         user.setStatus(UserStatus.ACTIVE);
         user.setStatusDescription("User email verified to reset password");
         userRepository.save(user);
-        return VerificationEmailResponse.builder().message("Email verified successfully!").build();
+
+        return VerificationEmailResponse.builder()
+                .message("Email verified successfully!")
+                .build();
     }
 
 
