@@ -10,12 +10,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @AllArgsConstructor
@@ -67,8 +70,12 @@ public class UserAuthController {
     // Verification email forgot password
     // ---------------------------
     @GetMapping("/forgot-password/verify")
-    public VerificationEmailResponse verifyEmailForgotPassword(@RequestParam("token") String token) {
-        return userAuthService.VerificationEmailForgotPassword(token);
+    public void verifyEmailForgotPassword(@RequestParam("token") String token,
+                                          HttpServletResponse response     ) throws IOException {
+        userAuthService.VerificationEmailForgotPassword(token);
+        response.sendRedirect(
+                "https://canyoncompanion.duckdns.org/reset-password?token=" + token
+        );
     }
     // ---------------------------
     // Forgot password
