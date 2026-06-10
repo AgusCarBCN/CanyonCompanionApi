@@ -3,8 +3,6 @@ package com.canyoncompanion.canyon_api.controller.user;
 
 import com.canyoncompanion.canyon_api.dtos.requests.*;
 import com.canyoncompanion.canyon_api.dtos.responses.*;
-import com.canyoncompanion.canyon_api.service.TokenService;
-import com.canyoncompanion.canyon_api.service.TokenServiceImpl;
 import com.canyoncompanion.canyon_api.service.user.UserAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

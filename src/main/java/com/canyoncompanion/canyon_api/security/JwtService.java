@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -11,13 +12,13 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
 
-    @Value("${JWT_SECRET}")
-    private String secretKey;
 
-    @Value("${JWT_ACCESS_EXPIRATION}")
-    private Long accessTokenExpiration;
+    private final String secretKey="3R73bWKgByjTFmDr3KoeN7Zk3PNJ9eeVEaThL5W6fIc=";
+
+    private final Long accessTokenExpiration=900000L;
 
     // =========================
     // GENERATE ACCESS TOKEN

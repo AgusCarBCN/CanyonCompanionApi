@@ -13,7 +13,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     Optional<RefreshToken> findByToken(String token);
 
     @Query("""
-    select rt from RefreshTokenEntity rt
+    select rt from RefreshToken rt
     join fetch rt.user u
     where u.id = :userId
 """)
@@ -21,7 +21,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
 
     Optional<RefreshToken> findByUser(UserEntity user);
 
-    @Query("SELECT r FROM RefreshTokenEntity r JOIN FETCH r.user WHERE r.token = :token")
+    @Query("SELECT r FROM RefreshToken r JOIN FETCH r.user WHERE r.token = :token")
     Optional<RefreshToken> findByTokenWithUser(@Param("token") String token);
 
     void deleteByUser(UserEntity user);

@@ -1,6 +1,8 @@
 package com.canyoncompanion.canyon_api.security;
 
 
+import com.canyoncompanion.canyon_api.dtos.requests.TokenRequestDTO;
+import com.canyoncompanion.canyon_api.dtos.responses.AuthResponse;
 import com.canyoncompanion.canyon_api.exception.BusinessException;
 import com.canyoncompanion.canyon_api.exception.ErrorCode;
 import com.canyoncompanion.canyon_api.model.entities.RefreshToken;
@@ -8,17 +10,19 @@ import com.canyoncompanion.canyon_api.model.entities.UserEntity;
 import com.canyoncompanion.canyon_api.repository.RefreshTokenRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 @Service
 
 public class RefreshTokenService {
 
-    @Value("${JWT_REFRESH_EXPIRATION}")
-    private Long refreshTokenDuration;
+
+    private final Long refreshTokenDuration=1209600000L;
 
     private final RefreshTokenRepository repository;
 
@@ -106,4 +110,60 @@ public class RefreshTokenService {
 
         repository.deleteAll(expired);
     }
+    // =====================================================
+    // REFRESH FLOW (rotación real)
+    // =====================================================
+
+    public RefreshToken rotateToken(RefreshToken oldToken) {
+
+        if (oldToken == null || oldToken.getUser() == null) {
+            throw new BusinessException(
+                    "Invalid refresh token",
+                    "REFRESH_TOKEN_INVALID",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        // opcional pero recomendable: validar expiración aquí también
+        if (oldToken.getExpiryDate().isBefore(Instant.now())) {
+            repository.delete(oldToken);
+            throw new BusinessException(
+                    "Refresh token expired",
+                    "REFRESH_TOKEN_EXPIRED",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        // invalida SOLO este token
+        repository.delete(oldToken);
+
+        // crea nuevo
+        return createToken(oldToken.getUser());
+    }
+    public void deleteToken(RefreshToken refreshToken) {
+        repository.delete(refreshToken);
+    }
+    public RefreshToken findByToken(String token) {
+
+        RefreshToken refreshToken = repository.findByToken(token)
+                .orElseThrow(() -> new BusinessException(
+                        "Invalid refresh token",
+                        "REFRESH_TOKEN_INVALID",
+                        HttpStatus.UNAUTHORIZED
+                ));
+
+        // solo afecta a este token, no a toda la cuenta
+        if (refreshToken.getExpiryDate().isBefore(Instant.now())) {
+            repository.delete(refreshToken);
+
+            throw new BusinessException(
+                    "Refresh token expired",
+                    "REFRESH_TOKEN_EXPIRED",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        return refreshToken;
+    }
+
 }

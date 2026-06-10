@@ -10,12 +10,12 @@ import com.canyoncompanion.canyon_api.model.entities.RoleEntity;
 import com.canyoncompanion.canyon_api.model.entities.UserEntity;
 import com.canyoncompanion.canyon_api.model.enums.Roles;
 import com.canyoncompanion.canyon_api.model.enums.UserStatus;
-import com.canyoncompanion.canyon_api.repository.RefreshTokenRepository;
 import com.canyoncompanion.canyon_api.repository.RoleRepository;
 import com.canyoncompanion.canyon_api.repository.UserRepository;
 import com.canyoncompanion.canyon_api.security.JwtService;
+import com.canyoncompanion.canyon_api.security.RefreshTokenService;
 import com.canyoncompanion.canyon_api.service.EmailService;
-import com.canyoncompanion.canyon_api.service.TokenServiceImpl;
+import com.canyoncompanion.canyon_api.service.validationtokens.TokenValidationServiceImpl;
 import com.canyoncompanion.canyon_api.util.mappers.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,11 +42,11 @@ public class UserAuthServiceImpl implements UserAuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final RefreshTokenService refreshTokenService;
     private final UserMapper userMapper;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
-    private final TokenServiceImpl tokenService;
+    private final TokenValidationServiceImpl tokenService;
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
@@ -115,7 +115,6 @@ public class UserAuthServiceImpl implements UserAuthService {
         userRepository.save(user);
         //Send email
         emailService.sendVerificationEmail(user.getEmail(), verificationToken);
-
         return RegisterResponse.builder().message("Verification is successful").build();
 
     }
@@ -154,11 +153,6 @@ public class UserAuthServiceImpl implements UserAuthService {
             );
 
         }
-
-        /*if (!tokenService.validateToken(request.getToken())
-                    || !request.getToken().equals(user.getResetToken())) {
-                return ResetPasswordResponse.builder().message("Token Expired!").build();
-        }*/
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword())); // 🔥 AQUÍ
         user.setResetToken(null);
@@ -206,27 +200,7 @@ public class UserAuthServiceImpl implements UserAuthService {
 
         return generateAuthSession(user);
 
-        /*authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
 
-        UserEntity user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BusinessException(
-                        ErrorCode.USER_NOT_FOUND.name(),
-                        ErrorCode.USER_NOT_FOUND.getDefaultMessage(),
-                        HttpStatus.NOT_FOUND
-                ));
-        if(user.getStatus().equals(UserStatus.PENDING_VERIFICATION)) {
-            throw new BusinessException(
-                    ErrorCode.USER_VERIFICATION_PENDING.name(),
-                    ErrorCode.USER_VERIFICATION_PENDING.getDefaultMessage(),
-                    HttpStatus.FORBIDDEN);
-        }
-
-        return generateAuthSession(user);*/
     }
 
     // =====================================================
@@ -236,12 +210,13 @@ public class UserAuthServiceImpl implements UserAuthService {
     public AuthResponse refreshToken(TokenRequestDTO request) {
 
         RefreshToken oldToken =
-                tokenService.findByToken(request.getToken());
+                refreshTokenService.findByToken(request.getToken());
 
         assert oldToken != null;
         UserEntity user = oldToken.getUser();
         //Generate RefreshToken
-        String newRefreshToken = tokenService.rotateToken(oldToken);
+        RefreshToken refreshToken=refreshTokenService.rotateToken(oldToken);
+        String newRefreshToken = refreshToken.getToken();
 
         UserDetails userDetails =
                 userDetailsService.loadUserByUsername(user.getEmail());
@@ -263,8 +238,8 @@ public class UserAuthServiceImpl implements UserAuthService {
     @Override
     @Transactional
     public void logout(TokenRequestDTO request) {
-
-        refreshTokenRepository.deleteByToken(request.getToken());
+        RefreshToken refreshToken = refreshTokenService.findByToken(request.getToken());
+        refreshTokenService.deleteToken(refreshToken);
 
     }
 
@@ -400,7 +375,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         String accessToken = jwtService.generateAccessToken(userDetails);
 
         String refreshToken =
-                tokenService.generateLoginToken(userDetails);
+                refreshTokenService.createToken(user).getToken();
 
         return buildAuthResponse(userDetails, accessToken, refreshToken, user.getStatus());
     }
