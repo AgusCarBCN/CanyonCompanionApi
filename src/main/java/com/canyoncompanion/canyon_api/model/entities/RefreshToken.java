@@ -7,16 +7,18 @@ import lombok.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "refresh_tokens")
-@Getter
 @Setter
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RefreshTokenEntity {
+public class RefreshToken
+{
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false, unique = true)
     private String token;
 
@@ -26,5 +28,8 @@ public class RefreshTokenEntity {
 
     @Column(nullable = false)
     private Instant expiryDate;
+
+    @Column(nullable = false)
+    private boolean revoked = false;
 
 }

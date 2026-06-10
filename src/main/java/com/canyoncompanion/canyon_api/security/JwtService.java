@@ -9,8 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
@@ -18,58 +16,51 @@ public class JwtService {
     @Value("${JWT_SECRET}")
     private String secretKey;
 
-    @Value("${JWT_EXPIRATION}")
-    private Long refreshTokenExpiration;
+    @Value("${JWT_ACCESS_EXPIRATION}")
+    private Long accessTokenExpiration;
 
+    // =========================
+    // GENERATE ACCESS TOKEN
+    // =========================
+    public String generateAccessToken(UserDetails userDetails) {
 
-    public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .claim("roles", userDetails.getAuthorities())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
+                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
     }
 
+    // =========================
+    // VALIDATION
+    // =========================
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        return extractUsername(token).equals(userDetails.getUsername())
+                && !isTokenExpired(token);
     }
 
     public String extractUsername(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        return extractAllClaims(token).getSubject();
     }
 
-    public List<String> extractRoles(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return ((List<?>) claims.get("roles")).stream()
-                .map(Object::toString)
-                .collect(Collectors.toList());
+    private Date extractExpiration(String token) {
+        return extractAllClaims(token).getExpiration();
     }
-
 
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    private Date extractExpiration(String token) {
+    // =========================
+    // INTERNAL PARSER
+    // =========================
+    private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .build()
                 .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
+                .getBody();
     }
 }
-
-

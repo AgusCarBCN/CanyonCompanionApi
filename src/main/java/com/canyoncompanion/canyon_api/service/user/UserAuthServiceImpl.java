@@ -5,7 +5,7 @@ import com.canyoncompanion.canyon_api.dtos.requests.*;
 import com.canyoncompanion.canyon_api.dtos.responses.*;
 import com.canyoncompanion.canyon_api.exception.BusinessException;
 import com.canyoncompanion.canyon_api.exception.ErrorCode;
-import com.canyoncompanion.canyon_api.model.entities.RefreshTokenEntity;
+import com.canyoncompanion.canyon_api.model.entities.RefreshToken;
 import com.canyoncompanion.canyon_api.model.entities.RoleEntity;
 import com.canyoncompanion.canyon_api.model.entities.UserEntity;
 import com.canyoncompanion.canyon_api.model.enums.Roles;
@@ -20,7 +20,6 @@ import com.canyoncompanion.canyon_api.util.mappers.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -236,26 +235,25 @@ public class UserAuthServiceImpl implements UserAuthService {
     @Override
     public AuthResponse refreshToken(TokenRequestDTO request) {
 
-        RefreshTokenEntity oldToken =
+        RefreshToken oldToken =
                 tokenService.findByToken(request.getToken());
 
+        assert oldToken != null;
         UserEntity user = oldToken.getUser();
-
+        //Generate RefreshToken
         String newRefreshToken = tokenService.rotateToken(oldToken);
 
         UserDetails userDetails =
                 userDetailsService.loadUserByUsername(user.getEmail());
 
-        String newAccessToken = jwtService.generateToken(userDetails);
+        //Generate Access token
+        String newAccessToken = jwtService.generateAccessToken(userDetails);
 
         return AuthResponse.builder()
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .username(userDetails.getUsername())
-                /*.roles(userDetails.getAuthorities()
-                        .stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .toList())*/
+                .status(user.getStatus())
                 .build();
     }
 
@@ -399,7 +397,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         UserDetails userDetails =
                 userDetailsService.loadUserByUsername(user.getEmail());
 
-        String accessToken = jwtService.generateToken(userDetails);
+        String accessToken = jwtService.generateAccessToken(userDetails);
 
         String refreshToken =
                 tokenService.generateLoginToken(userDetails);
@@ -418,11 +416,6 @@ public class UserAuthServiceImpl implements UserAuthService {
                 .refreshToken(refreshToken)
                 .username(userDetails.getUsername())
                 .status(status)
-                // Aquí se podría mapear el status real del usuario si es necesario
-                /*.roles(userDetails.getAuthorities()
-                        .stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .toList())*/
                 .build();
     }
 

@@ -38,6 +38,7 @@ public enum ErrorCode {
     IMAGE_TOO_BIG("Image is too big"),
     GPX_FILE_TOO_BIG("GPX file is too big"),
     EMPTY_TOKEN("Token is empty"),
+    REVOKED_TOKEN("Revoked Token"),
     ;
     private final String defaultMessage;
 

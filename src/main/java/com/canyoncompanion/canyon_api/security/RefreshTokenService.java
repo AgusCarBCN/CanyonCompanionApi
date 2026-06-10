@@ -3,80 +3,107 @@ package com.canyoncompanion.canyon_api.security;
 
 import com.canyoncompanion.canyon_api.exception.BusinessException;
 import com.canyoncompanion.canyon_api.exception.ErrorCode;
-import com.canyoncompanion.canyon_api.model.entities.RefreshTokenEntity;
+import com.canyoncompanion.canyon_api.model.entities.RefreshToken;
 import com.canyoncompanion.canyon_api.model.entities.UserEntity;
 import com.canyoncompanion.canyon_api.repository.RefreshTokenRepository;
-import com.canyoncompanion.canyon_api.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-
+import java.util.List;
+import java.util.UUID;
 @Service
+
 public class RefreshTokenService {
 
-    @Autowired
-    private RefreshTokenRepository refreshTokenRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private JwtService jwtService;
-
     @Value("${JWT_REFRESH_EXPIRATION}")
-    private Long refreshTokenExpiration;
+    private Long refreshTokenDuration;
 
-    // Crear o refrescar refresh token
-    public String createOrRefreshToken(UserDetails userDetails) {
-        var user = userRepository.findByEmailWithRoles(userDetails.getUsername())
-                .orElseThrow(() -> new BusinessException(
-                        ErrorCode.USER_NOT_FOUND.name(),
-                        ErrorCode.USER_NOT_FOUND.getDefaultMessage(),
-                        HttpStatus.NOT_FOUND));
+    private final RefreshTokenRepository repository;
 
-        var refreshToken = refreshTokenRepository.findByUserId(user.getId()).orElse(null);
+    public RefreshTokenService(RefreshTokenRepository repository) {
+        this.repository = repository;
+    }
 
-        if (refreshToken == null || isExpired(refreshToken)) {
-            return generateAndSaveNewToken(userDetails, user);
+    // =====================================================
+    // CREATE TOKEN (BASE)
+    // =====================================================
+    public RefreshToken createToken(UserEntity user) {
+
+        RefreshToken token = new RefreshToken();
+
+        token.setToken(UUID.randomUUID().toString());
+        token.setUser(user);
+        token.setExpiryDate(
+                Instant.now().plusMillis(refreshTokenDuration)
+        );
+
+
+        return repository.save(token);
+    }
+
+    // =====================================================
+    // CREATE SESSION (LOGIN FLOW)
+    // =====================================================
+    public RefreshToken createSession(UserEntity user) {
+
+        return createToken(user);
+    }
+
+    // =====================================================
+    // VALIDATE TOKEN
+    // =====================================================
+    public RefreshToken validateToken(String token) {
+
+        RefreshToken refreshToken = repository.findByToken(token)
+                .orElseThrow(() ->
+                        new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN.name(),
+                                ErrorCode.INVALID_REFRESH_TOKEN.getDefaultMessage(),
+                                HttpStatus.UNAUTHORIZED));
+
+        if (refreshToken.isRevoked()) {
+            throw new BusinessException(ErrorCode.REVOKED_TOKEN.name(),
+                    ErrorCode.REVOKED_TOKEN.getDefaultMessage(),
+                    HttpStatus.UNAUTHORIZED);
         }
 
-        return refreshToken.getToken();
-    }
-
-    private boolean isExpired(RefreshTokenEntity token) {
-        if (token.getExpiryDate().isBefore(Instant.now())) {
-            // Eliminar token vencido
-            refreshTokenRepository.delete(token);
-            return true;
+        if (refreshToken.getExpiryDate().isBefore(Instant.now())) {
+            throw new BusinessException(ErrorCode.EXPIRED_TOKEN.name(),
+                    ErrorCode.EXPIRED_TOKEN.getDefaultMessage(),
+                    HttpStatus.UNAUTHORIZED);
         }
-        return false;
+
+        return refreshToken;
     }
 
-    private String generateAndSaveNewToken(UserDetails userDetails, UserEntity user) {
-        String token = jwtService.generateToken(userDetails);
-        Instant expiryDate = Instant.now().plusMillis(refreshTokenExpiration);
+    // =====================================================
+    // REVOKE SINGLE TOKEN
+    // =====================================================
+    public void revokeToken(String token) {
 
-        RefreshTokenEntity refreshToken = RefreshTokenEntity.builder()
-                .user(user)
-                .token(token)
-                .expiryDate(expiryDate)
-                .build();
+        RefreshToken refreshToken = repository.findByToken(token)
+                .orElseThrow(() ->
+                        new RuntimeException("Token not found"));
 
-        refreshTokenRepository.save(refreshToken);
-        return token;
+        refreshToken.setRevoked(true);
+
+        repository.save(refreshToken);
     }
 
-    public RefreshTokenEntity findByToken(String token) {
-        return refreshTokenRepository.findByToken(token)
-                .orElseThrow(() -> new BusinessException(
-                        ErrorCode.INVALID_REFRESH_TOKEN.name(),
-                        ErrorCode.INVALID_REFRESH_TOKEN.getDefaultMessage(),
-                        HttpStatus.BAD_REQUEST
-                ));
+
+
+    // =====================================================
+    // OPTIONAL: CLEAN EXPIRED TOKENS (CRON JOB FRIENDLY)
+    // =====================================================
+    public void deleteExpiredTokens() {
+
+        List<RefreshToken> expired =
+                repository.findAll()
+                        .stream()
+                        .filter(t -> t.getExpiryDate().isBefore(Instant.now()))
+                        .toList();
+
+        repository.deleteAll(expired);
     }
 }
-

@@ -2,7 +2,7 @@ package com.canyoncompanion.canyon_api.service;
 
 
 import com.canyoncompanion.canyon_api.exception.BusinessException;
-import com.canyoncompanion.canyon_api.model.entities.RefreshTokenEntity;
+import com.canyoncompanion.canyon_api.model.entities.RefreshToken;
 import com.canyoncompanion.canyon_api.model.entities.UserEntity;
 import com.canyoncompanion.canyon_api.repository.RefreshTokenRepository;
 import com.canyoncompanion.canyon_api.repository.UserRepository;
@@ -33,9 +33,9 @@ public class TokenServiceImpl implements TokenService {
     // =====================================================
     @Override
 
-    public RefreshTokenEntity findByToken(String token) {
+    public RefreshToken findByToken(String token) {
 
-        RefreshTokenEntity refreshToken = repository.findByToken(token)
+        RefreshToken refreshToken = repository.findByToken(token)
                 .orElseThrow(() -> new BusinessException(
                         "Invalid refresh token",
                         "REFRESH_TOKEN_INVALID",
@@ -90,7 +90,7 @@ public class TokenServiceImpl implements TokenService {
     // REFRESH FLOW (rotación real)
     // =====================================================
     @Override
-    public String rotateToken(RefreshTokenEntity oldToken) {
+    public String rotateToken(RefreshToken oldToken) {
 
         if (oldToken == null || oldToken.getUser() == null) {
             throw new BusinessException(
@@ -123,7 +123,7 @@ public class TokenServiceImpl implements TokenService {
     // =====================================================
 
     private String generateAndSaveToken(UserEntity user) {
-        RefreshTokenEntity token = RefreshTokenEntity.builder()
+        RefreshToken token = RefreshToken.builder()
                 .token(UUID.randomUUID().toString())
                 .user(user)
                 .expiryDate(Instant.now().plus(7, ChronoUnit.DAYS))
