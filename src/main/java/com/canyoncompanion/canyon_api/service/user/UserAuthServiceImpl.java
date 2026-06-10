@@ -88,15 +88,15 @@ public class UserAuthServiceImpl implements UserAuthService {
     @Override
     public RegisterResponse registerUser(UserRequestDTO request) {
 
-        UserEntity existingUser=userRepository.findByEmail(request.getEmail()).orElse(null);
-        if (existingUser!=null) {
-            if(existingUser.getStatus().equals(UserStatus.ACTIVE)) {
+        UserEntity existingUser = userRepository.findByEmail(request.getEmail()).orElse(null);
+        if (existingUser != null) {
+            if (existingUser.getStatus().equals(UserStatus.ACTIVE)) {
                 throw new BusinessException(
                         "USER_ALREADY_EXISTS AND ACTIVE",
                         "User already exists with email",
                         HttpStatus.CONFLICT
                 );
-            }else{
+            } else {
                 String verificationToken = tokenService.generateValidationToken(request.getEmail());
                 existingUser.setVerificationToken(verificationToken);
                 userRepository.save(existingUser);
@@ -126,12 +126,40 @@ public class UserAuthServiceImpl implements UserAuthService {
         String email = tokenService.extractEmail(request.getToken());
 
         UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow();
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.USER_NOT_FOUND.name(),
+                        ErrorCode.USER_NOT_FOUND.getDefaultMessage(),
+                        HttpStatus.NOT_FOUND
+                ));
 
-        if (!tokenService.validateToken(request.getToken())
-                || !request.getToken().equals(user.getResetToken())) {
-            return ResetPasswordResponse.builder().message("Token Expired!").build();
+        if (user.getResetToken() == null) {
+            throw new BusinessException(
+                    ErrorCode.EMPTY_TOKEN.name(),
+                    ErrorCode.EMPTY_TOKEN.getDefaultMessage(),
+                    HttpStatus.NOT_FOUND
+            );
         }
+
+        if (!user.getResetToken().equals(request.getToken())) {
+            throw new BusinessException(
+                    ErrorCode.INVALID_TOKEN.name(),
+                    ErrorCode.INVALID_TOKEN.getDefaultMessage(),
+                    HttpStatus.FORBIDDEN
+            );
+        }
+        if (!tokenService.validateToken(request.getToken())) {
+            throw new BusinessException(
+                    ErrorCode.EXPIRED_TOKEN.name(),
+                    ErrorCode.EXPIRED_TOKEN.getDefaultMessage(),
+                    HttpStatus.GONE
+            );
+
+        }
+
+        /*if (!tokenService.validateToken(request.getToken())
+                    || !request.getToken().equals(user.getResetToken())) {
+                return ResetPasswordResponse.builder().message("Token Expired!").build();
+        }*/
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword())); // 🔥 AQUÍ
         user.setResetToken(null);
@@ -139,6 +167,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         userRepository.save(user);
         return ResetPasswordResponse.builder().message("Password updated successfully!").build();
     }
+
 
     // =====================================================
     // LOGIN
@@ -275,7 +304,7 @@ public class UserAuthServiceImpl implements UserAuthService {
             );
 
         }
-        if(user.getVerificationToken()==null) {
+        if (user.getVerificationToken() == null) {
             throw new BusinessException(
                     ErrorCode.EMPTY_TOKEN.name(),
                     ErrorCode.EMPTY_TOKEN.getDefaultMessage(),
@@ -375,7 +404,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         String refreshToken =
                 tokenService.generateLoginToken(userDetails);
 
-        return buildAuthResponse(userDetails, accessToken, refreshToken,user.getStatus());
+        return buildAuthResponse(userDetails, accessToken, refreshToken, user.getStatus());
     }
 
     private AuthResponse buildAuthResponse(
@@ -389,7 +418,7 @@ public class UserAuthServiceImpl implements UserAuthService {
                 .refreshToken(refreshToken)
                 .username(userDetails.getUsername())
                 .status(status)
-                 // Aquí se podría mapear el status real del usuario si es necesario
+                // Aquí se podría mapear el status real del usuario si es necesario
                 /*.roles(userDetails.getAuthorities()
                         .stream()
                         .map(GrantedAuthority::getAuthority)
@@ -414,5 +443,5 @@ public class UserAuthServiceImpl implements UserAuthService {
 
         return roles;
     }
-    
+
 }

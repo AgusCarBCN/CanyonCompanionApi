@@ -53,8 +53,12 @@ public class UserAuthController {
     // Verification email
     // ---------------------------
     @GetMapping("/register/verify")
-    public VerificationEmailResponse verifyEmail(@RequestParam("token") String token) {
-        return userAuthService.VerificationEmail(token);
+    public void verifyEmail(@RequestParam("token") String token,
+                            HttpServletResponse response) throws IOException {
+        userAuthService.VerificationEmail(token);
+        response.sendRedirect(
+                "https://canyoncompanion.duckdns.org/verify-email?token=" + token
+        );
     }
     // ---------------------------
     // Forgot password
