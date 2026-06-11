@@ -113,8 +113,46 @@ public class RefreshTokenService {
     // =====================================================
     // REFRESH FLOW (rotación real)
     // =====================================================
-
     public RefreshToken rotateToken(RefreshToken oldToken) {
+
+        if (oldToken == null || oldToken.getUser() == null) {
+            throw new BusinessException(
+                    ErrorCode.INVALID_REFRESH_TOKEN.name(),
+                    ErrorCode.INVALID_REFRESH_TOKEN.getDefaultMessage(),
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        // 1. Revocado primero (ataque o reuse)
+        if (oldToken.isRevoked()) {
+            throw new BusinessException(
+                    ErrorCode.REVOKED_TOKEN.name(),
+                    ErrorCode.REVOKED_TOKEN.getDefaultMessage(),
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        // 2. Expirado
+        if (oldToken.getExpiryDate().isBefore(Instant.now())) {
+
+            oldToken.setRevoked(true);
+            repository.save(oldToken);
+
+            throw new BusinessException(
+                    ErrorCode.EXPIRED_TOKEN.name(),
+                    ErrorCode.EXPIRED_TOKEN.getDefaultMessage(),
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        // 3. Revocar token actual (rotación)
+        oldToken.setRevoked(true);
+        repository.save(oldToken);
+
+        // 4. Crear nuevo token
+        return createToken(oldToken.getUser());
+    }
+    /*public RefreshToken rotateToken(RefreshToken oldToken) {
 
         if (oldToken == null || oldToken.getUser() == null) {
             throw new BusinessException(
@@ -139,7 +177,7 @@ public class RefreshTokenService {
 
         // crea nuevo
         return createToken(oldToken.getUser());
-    }
+    }*/
     public void deleteToken(RefreshToken refreshToken) {
         repository.delete(refreshToken);
     }
