@@ -283,6 +283,7 @@ public class DescentServiceImpl implements DescentService {
                 .commitment(requestDTO.getCommitment())
                 .descriptionLink(requestDTO.getDescriptionLink())
                 .comments(requestDTO.getComments())
+                .updatedAt(requestDTO.getDate())
                 .user(user)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())

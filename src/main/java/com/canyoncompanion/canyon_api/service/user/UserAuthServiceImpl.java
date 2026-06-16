@@ -10,6 +10,7 @@ import com.canyoncompanion.canyon_api.model.entities.RoleEntity;
 import com.canyoncompanion.canyon_api.model.entities.UserEntity;
 import com.canyoncompanion.canyon_api.model.enums.Roles;
 import com.canyoncompanion.canyon_api.model.enums.UserStatus;
+import com.canyoncompanion.canyon_api.repository.RefreshTokenRepository;
 import com.canyoncompanion.canyon_api.repository.RoleRepository;
 import com.canyoncompanion.canyon_api.repository.UserRepository;
 import com.canyoncompanion.canyon_api.security.JwtService;
@@ -30,7 +31,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -42,6 +45,7 @@ public class UserAuthServiceImpl implements UserAuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final RefreshTokenService refreshTokenService;
     private final UserMapper userMapper;
     private final AuthenticationManager authenticationManager;
@@ -206,7 +210,71 @@ public class UserAuthServiceImpl implements UserAuthService {
     // =====================================================
     // REFRESH TOKEN
     // =====================================================
+
     @Override
+    @Transactional
+    public AuthResponse refreshToken(TokenRequestDTO request) {
+
+        RefreshToken oldToken =
+                refreshTokenService.findByToken(request.getToken());
+
+        if (oldToken == null) {
+            throw new BusinessException(
+                    ErrorCode.INVALID_REFRESH_TOKEN.name(),
+                    ErrorCode.INVALID_REFRESH_TOKEN.getDefaultMessage(),
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        UserEntity user = oldToken.getUser();
+
+        // 🔴 REUSE DETECTION
+        if (oldToken.isRevoked()) {
+            // posible ataque: token reutilizado
+            revokeAllUserTokens(user);
+
+            throw new BusinessException(
+                    ErrorCode.REVOKED_TOKEN.name(),
+                    "Refresh token reuse detected. All sessions revoked.",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        // 🔴 EXPIRATION CHECK
+        if (oldToken.getExpiryDate().isBefore(Instant.now())) {
+            oldToken.setRevoked(true);
+            refreshTokenRepository.save(oldToken);
+
+            throw new BusinessException(
+                    ErrorCode.EXPIRED_TOKEN.name(),
+                    ErrorCode.EXPIRED_TOKEN.getDefaultMessage(),
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        // 🔵 ROTATE TOKEN
+        oldToken.setRevoked(true);
+        refreshTokenRepository.save(oldToken);
+
+        RefreshToken newRefreshToken =
+                refreshTokenService.createToken(user);
+
+        // 🔵 GENERATE ACCESS TOKEN
+        UserDetails userDetails =
+                userDetailsService.loadUserByUsername(user.getEmail());
+
+        String newAccessToken =
+                jwtService.generateAccessToken(userDetails);
+
+        return AuthResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken.getToken())
+                .username(userDetails.getUsername())
+                .status(user.getStatus())
+                .build();
+    }
+
+   /* @Override
     public AuthResponse refreshToken(TokenRequestDTO request) {
 
         RefreshToken oldToken =
@@ -230,19 +298,24 @@ public class UserAuthServiceImpl implements UserAuthService {
                 .username(userDetails.getUsername())
                 .status(user.getStatus())
                 .build();
-    }
-
+    }*/
     // =====================================================
     // LOGOUT
     // =====================================================
+
+
     @Override
     @Transactional
     public void logout(TokenRequestDTO request) {
-        RefreshToken refreshToken = refreshTokenService.findByToken(request.getToken());
-        refreshTokenService.deleteToken(refreshToken);
 
+        RefreshToken refreshToken =
+                refreshTokenService.findByToken(request.getToken());
+
+        if (refreshToken != null) {
+            refreshToken.setRevoked(true);
+            refreshTokenRepository.save(refreshToken);
+        }
     }
-
     // =====================================================
     // ME
     // =====================================================
@@ -411,5 +484,14 @@ public class UserAuthServiceImpl implements UserAuthService {
 
         return roles;
     }
+    @Transactional
+    public void revokeAllUserTokens(UserEntity user) {
 
+        List<RefreshToken> tokens =
+                refreshTokenRepository.findAllValidTokensByUser(user.getId());
+
+        tokens.forEach(token -> token.setRevoked(true));
+
+        refreshTokenRepository.saveAll(tokens);
+    }
 }
