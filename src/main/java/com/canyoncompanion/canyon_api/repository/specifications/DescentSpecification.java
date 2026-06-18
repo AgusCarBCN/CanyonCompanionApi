@@ -1,6 +1,7 @@
 package com.canyoncompanion.canyon_api.repository.specifications;
 
 import com.canyoncompanion.canyon_api.model.entities.DescentEntity;
+import com.canyoncompanion.canyon_api.model.entities.UserEntity;
 import com.canyoncompanion.canyon_api.model.enums.AquaticCharacter;
 import com.canyoncompanion.canyon_api.model.enums.Commitment;
 import com.canyoncompanion.canyon_api.model.enums.VerticalCharacter;
@@ -14,6 +15,7 @@ import java.util.List;
 public class DescentSpecification {
 
     public static Specification<DescentEntity> filter(
+            UserEntity user,
             String name,
             String location,
             String province,
@@ -25,6 +27,15 @@ public class DescentSpecification {
         return (root, query, cb) -> {
 
             List<Predicate> predicates = new ArrayList<>();
+
+            // =========================
+            // USER
+            // =========================
+            if (user != null) {
+                predicates.add(
+                        cb.equal(root.get("user"), user)
+                );
+            }
 
             // =========================
             // NAME

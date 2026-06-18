@@ -23,6 +23,8 @@ public interface DescentMapper {
     @Mapping(source = "images", target = "images")
     DescentResponseDTO toDTO(DescentEntity entity);
 
+
+
     List<DescentResponseDTO> toDTOList(List<DescentEntity> entities);
 
     @Mapping(target = "id", ignore = true)

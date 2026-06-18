@@ -79,13 +79,39 @@ public class DescentServiceImpl implements DescentService {
     }
 
     @Override
-    public PageResponse<DescentResponseDTO> getMyDescents(String field, Boolean desc, Integer page, Integer size) {
-        val user =currentUserService.getCurrentUser();
-        val sort =  Sort.getDescentSort(field,desc);
-        Pageable pageable = PageRequest.of(page,size, sort);
-        val descentsPage = descentRepository.findAllByUserId (user.getId(),pageable).map(descentMapper::toDTO);
+    public PageResponse<DescentPreviewDTO> getMyDescents(String name, String location, String province, VerticalCharacter verticalCharacter, AquaticCharacter aquaticCharacter, Commitment commitment) {
+        val user = currentUserService.getCurrentUser();
+        Specification<DescentEntity> specification =
+                DescentSpecification.filter(
+                        user,
+                        name,
+                        location,
+                        province,
+                        verticalCharacter,
+                        aquaticCharacter,
+                        commitment
+                );
+        val sort =  Sort.getDescentSort("createdAt",true);
+
+        Pageable pageable = PageRequest.of(0,10, sort);
+        val descentsPage = descentRepository.findAll(specification,pageable)
+                .map(entity->
+                        DescentPreviewDTO.builder()
+                                .id(entity.getId())
+                                .name(entity.getName())
+                                .location(entity.getLocation())
+                                .province(entity.getProvince())
+                                .verticalCharacter(entity.getVerticalCharacter())
+                                .aquaticCharacter(entity.getAquaticCharacter())
+                                .commitment(entity.getCommitment())
+                                .userName(entity.getUser().getUsername())
+                                .thumbnailUrl(buildThumbnail(entity.getImages()))
+                                .build()
+                );
+
         return PageResponseMapper.mapToPageResponse(descentsPage);
     }
+
 
     @Transactional
     @Override
@@ -283,7 +309,7 @@ public class DescentServiceImpl implements DescentService {
                 .commitment(requestDTO.getCommitment())
                 .descriptionLink(requestDTO.getDescriptionLink())
                 .comments(requestDTO.getComments())
-                .updatedAt(requestDTO.getDate())
+                .updatedAt(LocalDateTime.now())
                 .user(user)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
@@ -320,6 +346,7 @@ public class DescentServiceImpl implements DescentService {
     public PageResponse<DescentPreviewDTO> getDescents(String name, String location, String province, VerticalCharacter verticalCharacter, AquaticCharacter aquaticCharacter, Commitment commitment) {
         Specification<DescentEntity> specification =
                 DescentSpecification.filter(
+                        null,
                         name,
                         location,
                         province,

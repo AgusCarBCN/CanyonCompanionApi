@@ -73,5 +73,7 @@ public interface DescentRepository extends JpaRepository<DescentEntity, Long>, J
     Optional<DescentEntity> findByIdWithImages(@Param("id") Long id);
 
     Page<DescentEntity> findAll(Specification<DescentEntity> spec, Pageable pageable);
+
+
 }
 

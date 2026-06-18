@@ -42,11 +42,13 @@ public interface DescentService {
     /**
      * Retrieves descents owned by the authenticated user.
      */
-    PageResponse<DescentResponseDTO> getMyDescents(
-            String field,
-            Boolean desc,
-            Integer page,
-            Integer size
+    PageResponse<DescentPreviewDTO> getMyDescents(
+            String name,
+            String location,
+            String province,
+            VerticalCharacter verticalCharacter,
+            AquaticCharacter aquaticCharacter,
+            Commitment commitment
     );
 
     // =====================================================

@@ -31,21 +31,16 @@ public class AuthRequestDTO {
 
     @Schema(
             description = """
-                User password.
-                Must contain at least:
-                - 1 uppercase letter
-                - 1 lowercase letter
-                - 1 number
-                - 1 special character
+                User password.                
                 - Minimum length of 8 characters
                 """,
             example = "StrongP@ssw0rd",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     @Size(min=8)
-    @Pattern(
+    /*@Pattern(
             regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
             message = "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character"
-    )
+    )*/
     private String password;
 }

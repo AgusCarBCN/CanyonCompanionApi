@@ -2,8 +2,12 @@ package com.canyoncompanion.canyon_api.controller;
 
 
 import com.canyoncompanion.canyon_api.dtos.requests.DescentRequestDTO;
+import com.canyoncompanion.canyon_api.dtos.responses.DescentPreviewDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.DescentResponseDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.PageResponse;
+import com.canyoncompanion.canyon_api.model.enums.AquaticCharacter;
+import com.canyoncompanion.canyon_api.model.enums.Commitment;
+import com.canyoncompanion.canyon_api.model.enums.VerticalCharacter;
 import com.canyoncompanion.canyon_api.service.DescentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -47,14 +51,34 @@ public class UserDescentController {
     })
     @GetMapping("/me")
 
-    public ResponseEntity<PageResponse<DescentResponseDTO>> getMyDescents(
-            @RequestParam(defaultValue = "name") String field,
-            @RequestParam(defaultValue = "false") Boolean desc,
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size
+    public ResponseEntity<PageResponse<DescentPreviewDTO>> getMyDescents(
+            @RequestParam(required = false)
+            String name,
+
+            @RequestParam(required = false)
+            String location,
+
+            @RequestParam(required = false)
+            String province,
+
+            @RequestParam(required = false)
+            VerticalCharacter verticalCharacter,
+
+            @RequestParam(required = false)
+            AquaticCharacter aquaticCharacter,
+
+            @RequestParam(required = false)
+            Commitment commitment
     ) {
         return ResponseEntity.ok(
-                descentService.getMyDescents(field, desc, page, size)
+                descentService.getMyDescents(
+                        name,
+                        location,
+                        province,
+                        verticalCharacter,
+                        aquaticCharacter,
+                        commitment
+                )
         );
     }
 
@@ -107,16 +131,7 @@ public class UserDescentController {
 
         return ResponseEntity.ok().build();
     }
-   /*@PutMapping("/{id}")
 
-    public ResponseEntity<DescentResponseDTO> updateDescent(
-            @PathVariable Long id,
-            @RequestBody @Valid DescentRequestDTO dto
-    ) {
-        return ResponseEntity.ok(
-                descentService.updateDescent(id, dto)
-        );
-    }*/
 
     // =====================================================
     // DELETE DESCENT
