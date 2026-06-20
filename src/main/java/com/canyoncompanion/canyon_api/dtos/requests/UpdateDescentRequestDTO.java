@@ -4,7 +4,7 @@ import java.util.List;
 
 public class UpdateDescentRequestDTO {
 
-    private String title;
+    private DescentRequestDTO descent;
 
     private List<Long> imagesToDelete;
 }

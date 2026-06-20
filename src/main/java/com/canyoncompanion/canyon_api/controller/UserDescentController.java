@@ -124,10 +124,11 @@ public class UserDescentController {
     public ResponseEntity<Void> updateDescent(
             @PathVariable Long id,
             @RequestPart("data") DescentRequestDTO dto,
+            @RequestPart(value = "imagesToDelete", required = false) List<Long> imagesToDelete,
             @RequestPart(value = "files", required = false) MultipartFile[] files
     ) {
 
-        descentService.updateDescent(id, dto, files);
+        descentService.updateDescent(id, dto,imagesToDelete, files);
 
         return ResponseEntity.ok().build();
     }

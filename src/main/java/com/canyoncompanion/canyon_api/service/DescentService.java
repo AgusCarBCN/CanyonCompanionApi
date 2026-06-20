@@ -10,6 +10,7 @@ import com.canyoncompanion.canyon_api.model.entities.DescentEntity;
 import com.canyoncompanion.canyon_api.model.enums.AquaticCharacter;
 import com.canyoncompanion.canyon_api.model.enums.Commitment;
 import com.canyoncompanion.canyon_api.model.enums.VerticalCharacter;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -63,7 +64,7 @@ public interface DescentService {
     // =====================================================
     // UPDATE
     // =====================================================
-    public void updateDescent(Long id, DescentRequestDTO dto, MultipartFile[] files);
+    //public void updateDescent(Long id, List<Long> imagesToDelete,DescentRequestDTO dto, MultipartFile[] files);
     /**
      * Updates a descent.
      * Only allowed if the authenticated user is the owner.
@@ -76,6 +77,14 @@ public interface DescentService {
     // =====================================================
     // DELETE
     // =====================================================
+
+    @Transactional
+    void updateDescent(
+            Long id,
+            DescentRequestDTO dto,
+            List<Long> imagesToDelete,
+            MultipartFile[] files
+    );
 
     /**
      * Deletes a descent.

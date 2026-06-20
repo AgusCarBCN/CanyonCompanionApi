@@ -24,7 +24,6 @@ import com.canyoncompanion.canyon_api.util.mappers.PageResponseMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -135,6 +134,78 @@ public class DescentServiceImpl implements DescentService {
     }
     @Transactional
     @Override
+    public void updateDescent(
+            Long id,
+            DescentRequestDTO dto,
+            List<Long> imagesToDelete,
+            MultipartFile[] files
+    ) {
+
+        val user = currentUserService.getCurrentUser();
+
+        val descentEntity = descentRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(
+                        "Descent not found with id: " + id,
+                        ErrorCode.DESCENT_NOT_FOUND.getDefaultMessage(),
+                        HttpStatus.NOT_FOUND
+                ));
+
+        if (!descentEntity.getUser().getId().equals(user.getId())) {
+            throw new BusinessException(
+                    "You are not authorized to update this descent",
+                    ErrorCode.NO_OWNER_DESCENT.name(),
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
+        // 1. actualizar datos básicos
+        descentMapper.updateEntityFromDto(dto, descentEntity);
+        descentRepository.save(descentEntity);
+
+        // 2. BORRAR SOLO LAS IMÁGENES SELECCIONADAS
+        if (imagesToDelete != null && !imagesToDelete.isEmpty()) {
+
+            for (Long imageId : imagesToDelete) {
+
+                DescentImageEntity image = descentImageRepository.findById(imageId)
+                        .orElse(null);
+
+                if (image == null) continue;
+
+                // seguridad: evitar borrar imágenes de otro descenso
+                if (!image.getDescent().getId().equals(descentEntity.getId())) {
+                    continue;
+                }
+
+                storageService.deleteFile(
+                        image.getImageUrl(),
+                        StorageType.DESCENT_IMAGE
+                );
+
+                descentImageRepository.delete(image);
+            }
+        }
+
+        // 3. SUBIR SOLO LAS NUEVAS
+        if (files != null && files.length > 0) {
+
+            for (MultipartFile file : files) {
+
+                String url = storageService.saveImage(file, StorageType.DESCENT_IMAGE);
+
+                DescentImageEntity image = DescentImageEntity.builder()
+                        .imageUrl(url)
+                        .descent(descentEntity)
+                        .createdAt(LocalDateTime.now())
+                        .updatedAt(LocalDateTime.now())
+                        .build();
+
+                descentImageRepository.save(image);
+            }
+        }
+    }
+    /*@Transactional
+    @Override
     public void updateDescent(Long id, DescentRequestDTO dto, MultipartFile[] files) {
         val user = currentUserService.getCurrentUser();
         val descentEntity = descentRepository.findById(id).orElseThrow(() -> new BusinessException(
@@ -179,7 +250,7 @@ public class DescentServiceImpl implements DescentService {
                 descentImageRepository.save(image);
             }
         }
-    }
+    }*/
 
 
     @Transactional
