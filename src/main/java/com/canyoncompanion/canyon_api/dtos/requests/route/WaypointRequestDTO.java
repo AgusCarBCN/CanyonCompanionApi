@@ -1,4 +1,4 @@
-package com.canyoncompanion.canyon_api.dtos.requests;
+package com.canyoncompanion.canyon_api.dtos.requests.route;
 
 import com.canyoncompanion.canyon_api.model.enums.WayPointSymbol;
 import jakarta.validation.constraints.NotNull;
@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 public class WaypointRequestDTO {
 
     private String name;
+
     private String description;
 
     @NotNull(message = "latitude is required")
@@ -26,7 +27,10 @@ public class WaypointRequestDTO {
     @NotNull(message = "longitude is required")
     private Double longitude;
 
-    private Double elevation;
+    private Float elevation;
+
+    @NotNull(message = "symbol is required")
     private WayPointSymbol symbol;
+
     private LocalDateTime time;
 }

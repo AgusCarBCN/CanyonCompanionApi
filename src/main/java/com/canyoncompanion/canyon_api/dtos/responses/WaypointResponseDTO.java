@@ -9,7 +9,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Getter
+/*@Getter
 @Setter
 @Builder
 @AllArgsConstructor
@@ -21,8 +21,33 @@ public class WaypointResponseDTO {
     private String description;
     private Double latitude;
     private Double longitude;
-    private Double elevation;
+    private Float elevation;
     private WayPointSymbol symbol;
     private String imagePath;
+    private LocalDateTime time;
+}*/
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class WaypointResponseDTO {
+
+    private Long id;
+
+    private String name;
+
+    private String description;
+
+    private Double latitude;
+
+    private Double longitude;
+
+    private Float elevation;
+
+    private WayPointSymbol symbol;
+
+    private String imagePath;
+
     private LocalDateTime time;
 }

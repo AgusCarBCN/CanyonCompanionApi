@@ -37,7 +37,7 @@ public class WaypointEntity {
     @Column(nullable = false)
     private Double longitude;
 
-    private Double elevation;
+    private Float elevation;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

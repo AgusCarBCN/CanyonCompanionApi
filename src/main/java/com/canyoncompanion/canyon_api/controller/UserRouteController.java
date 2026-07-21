@@ -1,10 +1,9 @@
 package com.canyoncompanion.canyon_api.controller;
 
 
-import com.canyoncompanion.canyon_api.dtos.requests.RouteRequestDTO;
+import com.canyoncompanion.canyon_api.dtos.requests.route.RouteRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.PageResponse;
 import com.canyoncompanion.canyon_api.dtos.responses.RouteResponseDTO;
-import com.canyoncompanion.canyon_api.model.entities.RouteEntity;
 import com.canyoncompanion.canyon_api.service.RouteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,7 +14,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

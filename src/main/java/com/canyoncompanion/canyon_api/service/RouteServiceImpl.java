@@ -1,7 +1,7 @@
 package com.canyoncompanion.canyon_api.service;
 
-import com.canyoncompanion.canyon_api.dtos.requests.RouteRequestDTO;
-import com.canyoncompanion.canyon_api.dtos.requests.WaypointRequestDTO;
+import com.canyoncompanion.canyon_api.dtos.requests.route.RouteRequestDTO;
+import com.canyoncompanion.canyon_api.dtos.requests.route.WaypointRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.PageResponse;
 import com.canyoncompanion.canyon_api.dtos.responses.RouteResponseDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.WaypointResponseDTO;
@@ -17,12 +17,10 @@ import com.canyoncompanion.canyon_api.util.mappers.RouteMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.RouteMatcher;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -40,60 +38,23 @@ public class RouteServiceImpl implements RouteService {
     private final StorageService storageService;
     private final RouteMapper routeMapper;
 
-   /* @Transactional
-    @Override
-    public RouteResponseDTO createRoute(RouteRequestDTO dto) {
-        // 👤 usuario autenticado
-        val user = currentUserService.getCurrentUser();
-        // 🗺️ map DTO → entity
-        val routeEntity = routeMapper.toEntity(dto);
-        // 🔗 asignar usuario (OBLIGATORIO)
-        routeEntity.setUser(user);
 
-        // 🧗 descent opcional
-
-        if (dto.getDescentId() != null) {
-            DescentEntity descent = descentRepository.findById(dto.getDescentId())
-                    .orElseThrow(() -> new BusinessException(
-                            "Descent not found with id: " + dto.getDescentId(),
-                            ErrorCode.DESCENT_NOT_FOUND.getDefaultMessage(),
-                            HttpStatus.NOT_FOUND
-                    ));
-            routeEntity.setDescent(descent);
-        }
-        // 🧭 waypoints
-        List<WaypointEntity> waypoints = new ArrayList<>();
-
-        if (dto.getWaypoints() != null) {
-            waypoints = dto.getWaypoints()
-                    .stream()
-                    .map(routeMapper::toWaypointEntity)
-                    .toList();
-        }
-
-       // 🔗 relación bidireccional
-        waypoints.forEach(wp -> wp.setRoute(routeEntity));
-        routeEntity.setWaypoints(waypoints);
-
-        // 💾 guardar todo (cascade)
-        RouteEntity saved = routeRepository.save(routeEntity);
-
-        // 📤 response
-        return routeMapper.toResponse(saved);
-
-    }*/
 
     @Transactional
     @Override
     public RouteResponseDTO createRoute(
             RouteRequestDTO dto,
-            MultipartFile gpxFile,
+            //MultipartFile gpxFile,
             MultipartFile[] waypointImages
     ) {
+        // =====================================
+        // 1. GET AUTHENTICATED USER
+        // =====================================
 
         UserEntity user = currentUserService.getCurrentUser();
 
-        // =====================================
+
+       /* // =====================================
         // 1. VALIDATE + UPLOAD GPX FIRST
         // =====================================
         if (gpxFile == null || gpxFile.isEmpty()) {
@@ -102,9 +63,9 @@ public class RouteServiceImpl implements RouteService {
                     ErrorCode.INVALID_FILE_TYPE.getDefaultMessage(),
                     HttpStatus.BAD_REQUEST
             );
-        }
+        }*/
 
-        String gpxUrl = storageService.saveGpxFile(gpxFile);
+        //String gpxUrl = storageService.saveGpxFile(gpxFile);
 
         // =====================================
         // 2. CREATE ROUTE ENTITY (WITH GPX READY)
@@ -114,7 +75,7 @@ public class RouteServiceImpl implements RouteService {
         route.setDescription(dto.getDescription());
         route.setUser(user);
         route.setDate(LocalDateTime.now());
-        route.setResourcePath(gpxUrl);
+       // route.setResourcePath(gpxUrl);
 
         if (dto.getDescentId() != null) {
             DescentEntity descent = descentRepository.findById(dto.getDescentId())
@@ -173,6 +134,12 @@ public class RouteServiceImpl implements RouteService {
 
         val routeSaved= routeRepository.save(route);
         return routeMapper.toResponse(routeSaved);
+        // =====================================
+        // 5. CREATE GPX FILE
+        // =====================================
+
+
+
     }
 
     @Override
