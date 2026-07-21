@@ -1,5 +1,6 @@
 package com.canyoncompanion.canyon_api.dtos.requests;
 
+import com.canyoncompanion.canyon_api.model.enums.WayPointSymbol;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,6 +27,6 @@ public class WaypointRequestDTO {
     private Double longitude;
 
     private Double elevation;
-    private Integer icon;
+    private WayPointSymbol symbol;
     private LocalDateTime time;
 }

@@ -142,7 +142,7 @@ public class RouteServiceImpl implements RouteService {
                 wp.setLatitude(wpDto.getLatitude());
                 wp.setLongitude(wpDto.getLongitude());
                 wp.setElevation(wpDto.getElevation());
-                wp.setIcon(wpDto.getIcon());
+                wp.setSymbol(wpDto.getSymbol());
                 wp.setTime(wpDto.getTime());
                 wp.setRoute(route);
 
@@ -371,7 +371,7 @@ public class RouteServiceImpl implements RouteService {
                 .latitude(waypoint.getLatitude())
                 .longitude(waypoint.getLongitude())
                 .elevation(waypoint.getElevation())
-                .icon(waypoint.getIcon())
+                .symbol(waypoint.getSymbol())
                 .imagePath(waypoint.getImagePath())
                 .time(waypoint.getTime())
                 .build();

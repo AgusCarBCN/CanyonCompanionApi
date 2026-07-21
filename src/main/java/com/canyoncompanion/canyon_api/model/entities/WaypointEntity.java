@@ -1,6 +1,7 @@
 package com.canyoncompanion.canyon_api.model.entities;
 
 
+import com.canyoncompanion.canyon_api.model.enums.WayPointSymbol;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,9 @@ public class WaypointEntity {
 
     private Double elevation;
 
-    private Integer icon;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private WayPointSymbol symbol;
 
     private String imagePath;
 
