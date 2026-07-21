@@ -32,12 +32,13 @@ public class RouteEntity {
     private DescentEntity descent;
 
     // 🗺️ waypoints
+
     @OneToMany(
             mappedBy = "route",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<WaypointEntity> waypoints = new ArrayList<>();
+    private List<WaypointEntity> waypoints;
 
     // 📌 datos básicos
     @Column(nullable = false)

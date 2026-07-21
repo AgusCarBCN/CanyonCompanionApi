@@ -57,45 +57,23 @@ public class GpxService {
             for (WaypointEntity waypoint : waypoints) {
 
 
-                gpxContent.append(
-                        "  <wpt lat=\""
-                                + waypoint.getLatitude()
-                                + "\" lon=\""
-                                + waypoint.getLongitude()
-                                + "\">\n"
-                );
+                gpxContent.append("  <wpt lat=\"").append(waypoint.getLatitude()).append("\" lon=\"").append(waypoint.getLongitude()).append("\">\n");
 
 
                 if (waypoint.getElevation() != null) {
-                    gpxContent.append(
-                            "    <ele>"
-                                    + waypoint.getElevation()
-                                    + "</ele>\n"
-                    );
+                    gpxContent.append("    <ele>").append(waypoint.getElevation()).append("</ele>\n");
                 }
 
 
-                gpxContent.append(
-                        "    <desc>"
-                                + waypoint.getDescription()
-                                + "</desc>\n"
-                );
+                gpxContent.append("    <desc>").append(waypoint.getDescription()).append("</desc>\n");
 
 
-                gpxContent.append(
-                        "    <sym>"
-                                + waypoint.getSymbol()
-                                + "</sym>\n"
-                );
+                gpxContent.append("    <sym>").append(waypoint.getSymbol()).append("</sym>\n");
 
 
                 if (waypoint.getImagePath() != null) {
 
-                    gpxContent.append(
-                            "    <link href=\""
-                                    + waypoint.getImagePath()
-                                    + "\">\n"
-                    );
+                    gpxContent.append("    <link href=\"").append(waypoint.getImagePath()).append("\">\n");
 
                     gpxContent.append(
                             "      <type>image/jpeg</type>\n"
@@ -122,22 +100,12 @@ public class GpxService {
 
             for (TrackPointRequestDTO point : trackPoints) {
 
-                gpxContent.append(
-                        "      <trkpt lat=\""
-                                + point.getLatitude()
-                                + "\" lon=\""
-                                + point.getLongitude()
-                                + "\">\n"
-                );
+                gpxContent.append("      <trkpt lat=\"").append(point.getLatitude()).append("\" lon=\"").append(point.getLongitude()).append("\">\n");
 
 
                 if (point.getElevation() != null) {
 
-                    gpxContent.append(
-                            "        <ele>"
-                                    + point.getElevation()
-                                    + "</ele>\n"
-                    );
+                    gpxContent.append("        <ele>").append(point.getElevation()).append("</ele>\n");
                 }
 
 

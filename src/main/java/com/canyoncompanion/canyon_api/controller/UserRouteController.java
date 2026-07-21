@@ -40,11 +40,10 @@ public class UserRouteController {
     })
     public ResponseEntity<RouteResponseDTO> createRoute(
             @RequestPart("data") RouteRequestDTO dto,
-            @RequestPart(value = "gpxFile", required = false) MultipartFile gpxFile,
             @RequestPart(value = "waypointImages", required = false) MultipartFile[] waypointImages
     ) {
 
-        RouteResponseDTO route = routeService.createRoute(dto, gpxFile, waypointImages);
+        RouteResponseDTO route = routeService.createRoute(dto, waypointImages);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(route);
     }

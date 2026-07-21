@@ -5,12 +5,14 @@ import com.canyoncompanion.canyon_api.dtos.requests.route.WaypointRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.PageResponse;
 import com.canyoncompanion.canyon_api.dtos.responses.RouteResponseDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.WaypointResponseDTO;
+import com.canyoncompanion.canyon_api.dtos.result.ElevationResult;
 import com.canyoncompanion.canyon_api.exception.BusinessException;
 import com.canyoncompanion.canyon_api.exception.ErrorCode;
 import com.canyoncompanion.canyon_api.model.entities.*;
 import com.canyoncompanion.canyon_api.repository.DescentRepository;
 import com.canyoncompanion.canyon_api.repository.RouteRepository;
 import com.canyoncompanion.canyon_api.repository.WaypointRepository;
+import com.canyoncompanion.canyon_api.util.gpx.GpxService;
 import com.canyoncompanion.canyon_api.util.helpers.Sort;
 import com.canyoncompanion.canyon_api.util.mappers.PageResponseMapper;
 import com.canyoncompanion.canyon_api.util.mappers.RouteMapper;
@@ -36,6 +38,8 @@ public class RouteServiceImpl implements RouteService {
     private final DescentRepository descentRepository;
     private final CurrentUserService currentUserService;
     private final StorageService storageService;
+    private final GpxService gpxService;
+    private final GeoService geoService;
     private final RouteMapper routeMapper;
 
 
@@ -44,60 +48,64 @@ public class RouteServiceImpl implements RouteService {
     @Override
     public RouteResponseDTO createRoute(
             RouteRequestDTO dto,
-            //MultipartFile gpxFile,
             MultipartFile[] waypointImages
     ) {
+
         // =====================================
         // 1. GET AUTHENTICATED USER
         // =====================================
 
-        UserEntity user = currentUserService.getCurrentUser();
+        UserEntity user =
+                currentUserService.getCurrentUser();
 
-
-       /* // =====================================
-        // 1. VALIDATE + UPLOAD GPX FIRST
-        // =====================================
-        if (gpxFile == null || gpxFile.isEmpty()) {
-            throw new BusinessException(
-                    "GPX file is required",
-                    ErrorCode.INVALID_FILE_TYPE.getDefaultMessage(),
-                    HttpStatus.BAD_REQUEST
-            );
-        }*/
-
-        //String gpxUrl = storageService.saveGpxFile(gpxFile);
 
         // =====================================
-        // 2. CREATE ROUTE ENTITY (WITH GPX READY)
+        // 2. CREATE ROUTE ENTITY
         // =====================================
+
         RouteEntity route = new RouteEntity();
+
         route.setName(dto.getName());
         route.setDescription(dto.getDescription());
         route.setUser(user);
         route.setDate(LocalDateTime.now());
-       // route.setResourcePath(gpxUrl);
 
-        if (dto.getDescentId() != null) {
-            DescentEntity descent = descentRepository.findById(dto.getDescentId())
-                    .orElseThrow();
+        // datos calculados en móvil
+        route.setTime(dto.getTime());
+        route.setDistance(dto.getDistance());
+
+
+        if(dto.getDescentId()!=null){
+
+            DescentEntity descent =
+                    descentRepository.findById(dto.getDescentId())
+                            .orElseThrow();
+
             route.setDescent(descent);
         }
 
-        // persist route first (needed for FK in waypoints)
-        route = routeRepository.save(route);
+
 
         // =====================================
-        // 3. BUILD WAYPOINTS + IMAGES
+        // 3. BUILD WAYPOINTS
         // =====================================
-        List<WaypointEntity> waypoints = new ArrayList<>();
 
-        if (dto.getWaypoints() != null) {
+        List<WaypointEntity> waypoints =
+                new ArrayList<>();
 
-            for (int i = 0; i < dto.getWaypoints().size(); i++) {
 
-                WaypointRequestDTO wpDto = dto.getWaypoints().get(i);
+        if(dto.getWaypoints()!=null){
 
-                WaypointEntity wp = new WaypointEntity();
+            for(int i=0;i<dto.getWaypoints().size();i++){
+
+                WaypointRequestDTO wpDto =
+                        dto.getWaypoints().get(i);
+
+
+                WaypointEntity wp =
+                        new WaypointEntity();
+
+
                 wp.setName(wpDto.getName());
                 wp.setDescription(wpDto.getDescription());
                 wp.setLatitude(wpDto.getLatitude());
@@ -105,41 +113,84 @@ public class RouteServiceImpl implements RouteService {
                 wp.setElevation(wpDto.getElevation());
                 wp.setSymbol(wpDto.getSymbol());
                 wp.setTime(wpDto.getTime());
+
                 wp.setRoute(route);
 
-                // =====================================
-                // 3.1 IMAGE UPLOAD (BY INDEX MATCH)
-                // =====================================
-                if (waypointImages != null
+
+
+                if(waypointImages != null
                         && i < waypointImages.length
                         && waypointImages[i] != null
-                        && !waypointImages[i].isEmpty()) {
+                        && !waypointImages[i].isEmpty()){
 
-                    String imageUrl = storageService.saveImage(
-                            waypointImages[i],
-                            StorageType.WAYPOINT_IMAGE
-                    );
+
+                    String imageUrl =
+                            storageService.saveImage(
+                                    waypointImages[i],
+                                    StorageType.WAYPOINT_IMAGE
+                            );
+
 
                     wp.setImagePath(imageUrl);
                 }
+
 
                 waypoints.add(wp);
             }
         }
 
-        // =====================================
-        // 4. ATTACH WAYPOINTS (CASCADE SAVE)
-        // =====================================
+
         route.setWaypoints(waypoints);
 
-        val routeSaved= routeRepository.save(route);
-        return routeMapper.toResponse(routeSaved);
+
+
         // =====================================
-        // 5. CREATE GPX FILE
+        // 4. CALCULATE ELEVATION
         // =====================================
 
+        ElevationResult elevationResult =
+                geoService.calculateElevation(
+                        dto.getTrackPoints()
+                );
 
 
+        route.setTotalAscent(
+                elevationResult.getAscent()
+        );
+
+
+        route.setTotalDescent(
+                elevationResult.getDescent()
+        );
+
+
+
+        // =====================================
+        // 5. CREATE GPX
+        // =====================================
+
+        String gpxPath =
+                gpxService.createGpxFile(
+                        dto.getName(),
+                        dto.getTrackPoints(),
+                        waypoints
+                );
+
+
+        route.setResourcePath(gpxPath);
+
+
+
+        // =====================================
+        // 6. SAVE COMPLETE ROUTE
+        // =====================================
+
+        RouteEntity saved =
+                routeRepository.save(route);
+
+
+
+        return routeMapper.toResponse(saved);
     }
 
     @Override
