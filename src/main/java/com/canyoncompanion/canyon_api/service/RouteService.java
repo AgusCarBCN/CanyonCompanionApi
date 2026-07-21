@@ -13,7 +13,6 @@ public interface RouteService {
     //RouteResponseDTO createRoute(RouteRequestDTO dto);
     RouteResponseDTO createRoute(
             RouteRequestDTO dto,
-           //MultipartFile gpxFile,
             MultipartFile[] waypointImages
     );
     // =====================================================
