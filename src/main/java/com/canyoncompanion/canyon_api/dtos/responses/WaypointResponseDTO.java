@@ -32,8 +32,32 @@ public class WaypointResponseDTO {
 @AllArgsConstructor
 @NoArgsConstructor
 public class WaypointResponseDTO {
-
     private Long id;
+
+
+    private String name;
+
+
+    private String description;
+
+
+    private Double latitude;
+
+
+    private Double longitude;
+
+
+    private Float elevation;
+
+
+    private WayPointSymbol symbol;
+
+
+    private LocalDateTime time;
+
+
+    private WayPointImageResponse image;
+    /*private Long id;
 
     private String name;
 
@@ -49,5 +73,5 @@ public class WaypointResponseDTO {
 
     private String imagePath;
 
-    private LocalDateTime time;
+    private LocalDateTime time;*/
 }

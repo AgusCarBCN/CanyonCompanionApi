@@ -25,8 +25,32 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserRouteController {
 
     private final RouteService routeService;
-
     // =====================================================
+    // CREATE ROUTE
+    // =====================================================
+    @PostMapping
+    @Operation(
+            summary = "Create a new route",
+            description = "Creates a route owned by the authenticated user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Route created successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    public ResponseEntity<RouteResponseDTO> createRoute(
+            @RequestPart("data") RouteRequestDTO dto,
+            @RequestPart(value = "waypointImages", required = false)
+            MultipartFile[] waypointImages
+    ) {
+
+        RouteResponseDTO route =
+                routeService.createRoute(dto, waypointImages);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(route);
+    }
+    /*// =====================================================
     // CREATE ROUTE
     // =====================================================
     @PostMapping
@@ -46,7 +70,7 @@ public class UserRouteController {
         RouteResponseDTO route = routeService.createRoute(dto, waypointImages);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(route);
-    }
+    }*/
     /*public ResponseEntity<RouteResponseDTO> createRoute(
             @RequestBody @Valid RouteRequestDTO dto
 

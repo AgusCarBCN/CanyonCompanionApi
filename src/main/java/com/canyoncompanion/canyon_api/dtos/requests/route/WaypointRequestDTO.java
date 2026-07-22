@@ -19,6 +19,32 @@ public class WaypointRequestDTO {
 
     private String name;
 
+
+    private String description;
+
+
+    @NotNull(message="latitude is required")
+    private Double latitude;
+
+
+    @NotNull(message="longitude is required")
+    private Double longitude;
+
+
+    private Float elevation;
+
+
+    @NotNull(message="symbol is required")
+    private WayPointSymbol symbol;
+
+
+    private LocalDateTime time;
+
+
+    private WayPointImageRequest image;
+
+   /* private String name;
+
     private String description;
 
     @NotNull(message = "latitude is required")
@@ -32,5 +58,5 @@ public class WaypointRequestDTO {
     @NotNull(message = "symbol is required")
     private WayPointSymbol symbol;
 
-    private LocalDateTime time;
+    private LocalDateTime time;*/
 }

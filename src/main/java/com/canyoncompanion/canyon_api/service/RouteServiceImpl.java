@@ -4,6 +4,7 @@ import com.canyoncompanion.canyon_api.dtos.requests.route.RouteRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.requests.route.WaypointRequestDTO;
 import com.canyoncompanion.canyon_api.dtos.responses.PageResponse;
 import com.canyoncompanion.canyon_api.dtos.responses.RouteResponseDTO;
+import com.canyoncompanion.canyon_api.dtos.responses.WayPointImageResponse;
 import com.canyoncompanion.canyon_api.dtos.responses.WaypointResponseDTO;
 import com.canyoncompanion.canyon_api.dtos.result.ElevationResult;
 import com.canyoncompanion.canyon_api.exception.BusinessException;
@@ -90,7 +91,78 @@ public class RouteServiceImpl implements RouteService {
         // 3. BUILD WAYPOINTS
         // =====================================
 
-        List<WaypointEntity> waypoints =
+
+        List<WaypointEntity> waypoints = new ArrayList<>();
+
+
+        if(dto.getWaypoints()!=null){
+
+            for(WaypointRequestDTO wpDto : dto.getWaypoints()){
+
+
+                WaypointEntity wp = new WaypointEntity();
+
+
+                wp.setName(wpDto.getName());
+                wp.setDescription(wpDto.getDescription());
+                wp.setLatitude(wpDto.getLatitude());
+                wp.setLongitude(wpDto.getLongitude());
+                wp.setElevation(wpDto.getElevation());
+                wp.setSymbol(wpDto.getSymbol());
+                wp.setTime(wpDto.getTime());
+
+                wp.setRoute(route);
+
+
+
+                // ==============================
+                // IMAGE
+                // ==============================
+
+                if(wpDto.getImage()!=null
+                        && wpDto.getImage().getImageKey()!=null){
+
+
+                    String imageKey =
+                            wpDto.getImage().getImageKey();
+
+
+                    MultipartFile imageFile =
+                            findImageByKey(
+                                    waypointImages,
+                                    imageKey
+                            );
+
+
+                    if(imageFile!=null){
+
+
+                        String imagePath =
+                                storageService.saveImage(
+                                        imageFile,
+                                        StorageType.WAYPOINT_IMAGE
+                                );
+
+
+                        WayPointImageEntity image =
+                                WayPointImageEntity.builder()
+                                        .imagePath(imagePath)
+                                        .waypoint(wp)
+                                        .build();
+
+
+                        wp.setImage(image);
+                    }
+                }
+
+
+                waypoints.add(wp);
+            }
+        }
+
+        route.setWaypoints(waypoints);
+
+       /* List<WaypointEntity> waypoints =
                 new ArrayList<>();
 
 
@@ -141,7 +213,7 @@ public class RouteServiceImpl implements RouteService {
 
 
         route.setWaypoints(waypoints);
-
+*/
 
 
         // =====================================
@@ -226,7 +298,7 @@ public class RouteServiceImpl implements RouteService {
 
     @Override
     public void deleteRoute(Long id) {
-        UserEntity user = currentUserService.getCurrentUser();
+    /*    UserEntity user = currentUserService.getCurrentUser();
 
         // =====================================
         // 1. LOAD ROUTE WITH WAYPOINTS
@@ -381,6 +453,8 @@ public class RouteServiceImpl implements RouteService {
                 .build();
     }
 
+
+
     private WaypointResponseDTO toWaypointResponse(WaypointEntity waypoint) {
         return WaypointResponseDTO.builder()
                 .id(waypoint.getId())
@@ -390,8 +464,31 @@ public class RouteServiceImpl implements RouteService {
                 .longitude(waypoint.getLongitude())
                 .elevation(waypoint.getElevation())
                 .symbol(waypoint.getSymbol())
-                .imagePath(waypoint.getImagePath())
                 .time(waypoint.getTime())
+                .image(waypoint.getImage() != null ? WayPointImageResponse.builder()
+                        .imagePath(waypoint.getImage().getImagePath())
+                        .build() : null)
                 .build();
+    }
+    private MultipartFile findImageByKey(
+            MultipartFile[] images,
+            String imageKey
+    ){
+
+        if(images==null){
+            return null;
+        }
+
+
+        for(MultipartFile image: images){
+
+            if(image.getOriginalFilename()
+                    .startsWith(imageKey)){
+
+                return image;
+            }
+        }
+
+        return null;
     }
 }

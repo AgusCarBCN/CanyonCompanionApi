@@ -71,9 +71,10 @@ public class GpxService {
                 gpxContent.append("    <sym>").append(waypoint.getSymbol()).append("</sym>\n");
 
 
-                if (waypoint.getImagePath() != null) {
+                if (waypoint.getImage() != null
+                && waypoint.getImage().getImagePath() != null) {
 
-                    gpxContent.append("    <link href=\"").append(waypoint.getImagePath()).append("\">\n");
+                    gpxContent.append("    <link href=\"").append(waypoint.getImage().getImagePath()).append("\">\n");
 
                     gpxContent.append(
                             "      <type>image/jpeg</type>\n"
